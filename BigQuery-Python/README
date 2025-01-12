@@ -1,15 +1,14 @@
 Project Description: 
 Here’s a simple Python-based web app using Flask that takes user input for a catalog type and owner, queries a BigQuery dataset, and returns the matching results.
 
-Authentication:
+Authentication Module:
 Users can log in with credentials (customer or admin).
 A login.html template is required for user login.
 A logout route (/logout) clears the session.
-Roles:
 
-Customer Role: Can query catalog information.
-Admin Role: Can update catalog information.
-New Route: /update allows admin users to modify catalog entries.
+Roles:
+1. Customer Role: Can query catalog information.
+2. Admin Role: Can update catalog information.  /update route allows admin users to modify catalog entries.
 
 If the user is logged in ('username' exists in the session), it renders the index.html template and passes the user’s role (session['role']) to it.
 If the user is not logged in, they are redirected to the login page.
@@ -36,7 +35,6 @@ schema_validator.py: Deals with XML schema validation.
 routes.py: Contains route definitions for the Flask app.
 app.py: The entry point that imports the app from routes.py and runs it.For a Flask application, the main Python script is typically named app.py, as it’s a common convention. However, you can name it anything you prefer (e.g., catalog_app.py) as long as you run the correct filename when starting the Flask server.
 templates/*html: The template for the form
-
 
 ==========================================================================
 
