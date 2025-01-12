@@ -1,4 +1,4 @@
-// command.i easy way without need to use 'extern'
+// command.i 
 %module command
 %{
 #include "command.h"  // Include the header file
