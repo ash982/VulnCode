@@ -10,6 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Call the C function
     //run_shell_command($safe_command);
+    
+    //unsafe
     run_shell_command($command);
 
     echo "Command executed: $safe_command";
