@@ -9,7 +9,7 @@ rules:
       - pattern: $_FILES[$KEY]
       - pattern: $_ENV[$KEY]
     pattern-propagators:
-      # Taint propagation through a SWIG function or PHP-to-C interface
+      # Test Taint propagation through a SWIG function or PHP-to-C interface
       - pattern: run_shell_command($TAINTED)
         from: $TAINTED
         to: $TAINTED
