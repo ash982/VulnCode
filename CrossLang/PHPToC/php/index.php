@@ -1,5 +1,5 @@
 <?php
-// Include the SWIG-generated PHP wrapper
+// Include the SWIG-generated PHP wrapper for C
 dl("command.so");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
