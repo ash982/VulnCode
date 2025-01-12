@@ -1,0 +1,21 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+</head>
+<body>
+    {% if username %}
+        <h2>Welcome, {{ username }}!</h2>
+        {% if role == 'admin' %}
+            <p>You have admin access.</p>
+        {% else %}
+            <p>You have customer access.</p>
+        {% endif %}
+    {% else %}
+        <p>Please log in to continue.</p>
+    {% endif %}
+</body>
+</html>
