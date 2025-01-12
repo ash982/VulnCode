@@ -1,0 +1,22 @@
+rules:
+  - id: php-to-c-system-taint
+    mode: taint
+    pattern-sources:
+      - pattern: $_POST[$KEY]
+      - pattern: $_GET[$KEY]
+      - pattern: $_REQUEST[$KEY]
+      - pattern: $_COOKIE[$KEY]
+      - pattern: $_FILES[$KEY]
+      - pattern: $_ENV[$KEY]
+    pattern-propagators:
+      # Taint propagation through a SWIG function or PHP-to-C interface
+      - pattern: run_shell_command($TAINTED)
+        from: $TAINTED
+        to: $TAINTED
+    pattern-sinks:
+      - pattern: system($CMD)
+    message: "Potential security risk: Tainted user input flows from PHP to C system()."
+    severity: ERROR
+    languages:
+      - php
+      - c
