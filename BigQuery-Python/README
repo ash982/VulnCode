@@ -1,0 +1,43 @@
+Project Description: 
+Here’s a simple Python-based web app using Flask that takes user input for a catalog type and owner, queries a BigQuery dataset, and returns the matching results.
+
+Authentication:
+Users can log in with credentials (customer or admin).
+A login.html template is required for user login.
+A logout route (/logout) clears the session.
+Roles:
+
+Customer Role: Can query catalog information.
+Admin Role: Can update catalog information.
+New Route: /update allows admin users to modify catalog entries.
+
+If the user is logged in ('username' exists in the session), it renders the index.html template and passes the user’s role (session['role']) to it.
+If the user is not logged in, they are redirected to the login page.
+
+=============================================================
+Folder Structure:
+your_project/
+├── app.py (main application)
+├── config.py
+├── bq_client.py
+├── routes.py
+├── schema_validator.py (use the xmlschema Python library to validate the user inputs 'catalog_type' and 'owner', the file extension .xml is used, but the content remains a valid XML Schema Definition/XSD.)
+└── templates/
+|    ├── index.html
+|    |── login.html
+|    └── logout.html
+├── static/
+└── requirements.txt (for install dependencies: pip install -r requirements.txt)    
+
+Summary of the Structure:
+config.py: Contains configuration (like secret key, Google credentials, users data).
+bq_client.py: Handles BigQuery logic.
+schema_validator.py: Deals with XML schema validation.
+routes.py: Contains route definitions for the Flask app.
+app.py: The entry point that imports the app from routes.py and runs it.For a Flask application, the main Python script is typically named app.py, as it’s a common convention. However, you can name it anything you prefer (e.g., catalog_app.py) as long as you run the correct filename when starting the Flask server.
+templates/*html: The template for the form
+
+
+==========================================================================
+
+Ensure you replace "path/to/your/service-account-file.json" with your actual Google Cloud service account file and update the BigQuery project and dataset references (your-project-id.dataset.catalog).
