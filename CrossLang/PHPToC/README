@@ -1,3 +1,7 @@
+Description:
+Start web server, the PHP page takes user input, calls the SWIG-generated wrapper, and passes the input to the C function that executes it as a shell command.
+
+
 File structure for your PHP-SWIG-C project:
 project/
 ├── src/
