@@ -1,5 +1,6 @@
 <?php
 // Include the SWIG-generated PHP wrapper for C
+
 dl("command.so");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -14,7 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //unsafe
     run_shell_command($command);
 
-    echo "Command executed: $safe_command";
+    //echo "Command executed: $safe_command";
+    echo "Command executed: $command";
+
 }
 ?>
 
