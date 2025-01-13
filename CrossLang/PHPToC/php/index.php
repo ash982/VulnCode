@@ -4,7 +4,7 @@ dl("command.so");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $command = $_POST['command'];
-
+    $command = sprintf("%s",$command);
     // Sanitize the user input (Important for security)
     $safe_command = escapeshellcmd($command);
 
