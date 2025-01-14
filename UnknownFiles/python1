@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+
+import subprocess
+
+def main():
+    # Prompt the user for input
+    user_input = input("Enter a command to execute: ")
+
+    try:
+        # Execute the user-provided command
+        result = subprocess.run(user_input, shell=True, text=True, capture_output=True)
+        
+        # Display the output or error
+        if result.returncode == 0:
+            print(f"Command output:\n{result.stdout}")
+        else:
+            print(f"Error executing command:\n{result.stderr}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    main()
