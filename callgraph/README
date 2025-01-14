@@ -1,8 +1,7 @@
 A PHP application that takes user input in home.php, validates it using one class, enriches it with the user's IP and a timestamp using another class, and then displays the result on the same page.
 =====================================
 File Structure
-arduino
-Copy code
+arduino code
 /app
   ├── classes
   │     ├── Validator.php
@@ -26,6 +25,7 @@ Result Display:
 If validation passes, the enriched data is displayed below the form.
 Errors are caught and displayed in a red message.
 
+================================
 Test Case
 Navigate to home.php.
 Enter valid and invalid inputs to see how validation and enrichment behave.
