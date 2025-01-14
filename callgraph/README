@@ -1,1 +1,33 @@
+A PHP application that takes user input in home.php, validates it using one class, enriches it with the user's IP and a timestamp using another class, and then displays the result on the same page.
+=====================================
+File Structure
+arduino
+Copy code
+/app
+  ├── classes
+  │     ├── Validator.php
+  │     └── Enricher.php
+  └── home.php
 
+===============================
+Explanation
+
+Input Handling:
+User inputs text in a form on home.php.
+The form submits data to the same page using the POST method.
+
+Validation:
+Validator::validateInput() ensures the input is trimmed, not empty, not excessively long, and sanitized for XSS.
+
+Enrichment:
+Enricher::enrichInput() adds metadata: the user's IP address and the current timestamp.
+
+Result Display:
+If validation passes, the enriched data is displayed below the form.
+Errors are caught and displayed in a red message.
+
+Test Case
+Navigate to home.php.
+Enter valid and invalid inputs to see how validation and enrichment behave.
+View enriched data (user's IP and timestamp).
+This approach maintains a clean separation of concerns while keeping the process simple and extendable.
