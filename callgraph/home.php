@@ -8,10 +8,13 @@ $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // Validate user input
-        $validatedInput = Validator::validateInput($_POST['user_input']);
-        
+        //$validatedInput = Validator::validateInput($_POST['user_input']);
+        $taintedInput = Validator::validateInput($_POST['user_input']);
+
         // Enrich user input with additional data
-        $result = Enricher::enrichInput($validatedInput);
+        //$result = Enricher::enrichInput($validatedInput);
+        $result = Enricher::enrichInput($taintedInput);
+
     } catch (Exception $e) {
         $error = $e->getMessage();
     }
@@ -41,7 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if ($result): ?>
         <div style="margin-top: 20px;">
             <h2>Result</h2>
-            <p><strong>Input:</strong> <?= htmlspecialchars($result['input'], ENT_QUOTES, 'UTF-8') ?></p>
+            <!-- <p><strong>Input:</strong> <?= htmlspecialchars($result['user_input'], ENT_QUOTES, 'UTF-8') ?></p> -- >
+            <p><strong>Input:</strong> <?= $result['user_input'] ?></p>
             <p><strong>IP Address:</strong> <?= htmlspecialchars($result['ip'], ENT_QUOTES, 'UTF-8') ?></p>
             <p><strong>Timestamp:</strong> <?= htmlspecialchars($result['timestamp'], ENT_QUOTES, 'UTF-8') ?></p>
         </div>
