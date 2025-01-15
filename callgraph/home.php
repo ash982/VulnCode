@@ -8,12 +8,10 @@ $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // Validate user input
-        //$validatedInput = Validator::validateInput($_POST['user_input']);
-        $taintedInput = Validator::validateInput($_POST['user_input']);
+        $validatedInput = Validator::validateInput($_POST['user_input']);
 
         // Enrich user input with additional data
-        //$result = Enricher::enrichInput($validatedInput);
-        $result = Enricher::enrichInput($taintedInput);
+        $result = Enricher::enrichInput($validatedInput);
 
     } catch (Exception $e) {
         $error = $e->getMessage();
