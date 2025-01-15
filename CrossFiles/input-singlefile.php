@@ -2,8 +2,6 @@
 // Simulating tainted input from user
 $taintedInput = $_GET['user_input'];
 
-// Create instances and pass tainted input
-$obj1 = new Class1($taintedInput);
 
 class Class1 {
     private $input;
@@ -18,6 +16,9 @@ class Class1 {
         eval("echo 'Evaluated in Class1: " . $this->input . "';");
     }
 }
+
+// Create instances and pass tainted input
+$obj1 = new Class1($taintedInput);
 
 // Use the classes
 $obj1->processInput();
