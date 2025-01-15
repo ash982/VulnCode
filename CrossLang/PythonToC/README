@@ -1,1 +1,41 @@
+1. Implement the Shell Execution Function in C
+Create a simple C function that executes shell commands using system().
 
+shell_exec.c
+
+
+2. Create a SWIG Interface File
+Define the SWIG interface for exposing the C function to Python.
+
+shell_exec.i
+
+
+3. Generate SWIG Wrapper Code
+Run the SWIG command to generate the wrapper code for Python.
+
+bash code
+swig -python shell_exec.i
+
+This generates:
+shell_exec_wrap.c: C wrapper code
+shell_exec.py: Python module to interact with the shared library
+
+4. Compile the C and Wrapper Code
+Compile the C code and SWIG wrapper into a shared library Python can import.
+
+bash code
+gcc -fPIC -c shell_exec.c shell_exec_wrap.c -I/usr/include/python3.8
+gcc -shared shell_exec.o shell_exec_wrap.o -o _shell_exec.so
+
+
+5. Use the Function in Python
+Use the compiled library and Python module to call the execute_command function.
+
+test_shell_exec.py
+
+
+6. Run the Python Script
+Run the Python script and observe the result.
+
+bash code
+python3 test_shell_exec.py
