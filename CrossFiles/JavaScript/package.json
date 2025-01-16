@@ -1,0 +1,12 @@
+{
+  "name": "tainted-input-example",
+  "version": "1.0.0",
+  "description": "Example demonstrating tainted input flow",
+  "main": "main.js",
+  "dependencies": {
+    "sqlite3": "^5.0.2"
+  },
+  "scripts": {
+    "start": "node main.js"
+  }
+}
