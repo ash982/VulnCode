@@ -1,1 +1,13 @@
 
+This JavaScript implementation showcases the same concepts as the previous examples:
+
+Tainted input is passed to multiple classes.
+Class1 uses exec(), which can execute arbitrary commands.
+Class2 constructs an SQL query without proper sanitization, potentially leading to SQL injection.
+Class2 includes database connection functionality using SQLite.
+
+
+To run this code, you'll need to install the sqlite3 package:
+
+npm install sqlite3
+
