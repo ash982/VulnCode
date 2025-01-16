@@ -1,1 +1,9 @@
+This Go implementation effectively demonstrates the taint analysis concepts:
 
+Tainted input is passed to multiple structs (Go's equivalent of classes).
+Class1 uses exec.Command(), which can execute arbitrary commands.
+Class2 constructs an SQL query without proper sanitization, potentially leading to SQL injection.
+To run this code, you'd need to install the SQLite driver for Go:
+
+go get github.com/mattn/go-sqlite3
+go run main.go class1.go class2.go "user input"
