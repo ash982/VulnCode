@@ -1,1 +1,11 @@
+This Java implementation effectively demonstrates taint analysis concepts:
 
+Tainted input is passed to multiple classes.
+Class1 uses Runtime.exec(), which can execute arbitrary commands.
+Class2 constructs an SQL query without proper sanitization, potentially leading to SQL injection.
+
+
+To run this code, you would compile and execute it like this:
+
+javac Main.java Class1.java Class2.java
+java Main "user input"
