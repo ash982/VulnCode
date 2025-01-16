@@ -1,1 +1,11 @@
+This TypeScript example effectively demonstrates taint analysis concepts:
 
+Tainted input is passed to multiple classes.
+Class1 uses exec(), which can execute arbitrary commands.
+Class2 constructs an SQL query without proper sanitization, potentially leading to SQL injection.
+
+
+To run this code, you'd need to install the necessary dependencies and use ts-node:
+
+npm install sqlite3 @types/sqlite3 ts-node typescript
+ts-node main.ts "user input"
