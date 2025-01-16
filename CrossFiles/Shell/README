@@ -3,6 +3,8 @@ This shell script implementation effectively demonstrates the taint analysis con
 Tainted input is passed to multiple scripts.
 class1.sh uses eval, which can execute arbitrary commands.
 class2.sh constructs an SQL query without proper sanitization, potentially leading to SQL injection.
+
+
 To run this code:
 
 chmod +x main.sh class1.sh class2.sh
