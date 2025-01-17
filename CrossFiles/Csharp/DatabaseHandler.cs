@@ -10,8 +10,8 @@ public class DatabaseHandler
         using (SqlConnection conn = new SqlConnection(connectionString))
         {
             conn.Open();
-            string sqlQuery = "SELECT * FROM Users WHERE username = @username";
-            
+            //string sqlQuery = "SELECT * FROM Users WHERE username = @username";
+            string sqlQuery = "SELECT * FROM Users WHERE username = '" + username + "'";
             using (SqlCommand cmd = new SqlCommand(sqlQuery, conn))
             {
                 cmd.Parameters.AddWithValue("@username", username); // Prevents SQL Injection
