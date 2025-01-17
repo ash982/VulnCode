@@ -1,0 +1,50 @@
+(base) MacBookPro:Go sj$ semgrep --validate --config="r/ash982.go-cross-file-taint" --pro
+semgrep-core exited with 2!
+Configuration is invalid - found 1 configuration error(s), and 1 rule(s).
+[ERROR] Error while running rules: 
+                    You are seeing this because the engine was killed.
+
+                    The most common reason this happens is because it used too much memory.
+                    If your repo is large (~10k files or more), you have three options:
+                    1. Increase the amount of memory available to semgrep
+                    2. Reduce the number of jobs semgrep runs with via `-j <jobs>`. We
+                        recommend using 1 job if you are running out of memory.
+                    3. Scan the repo in parts (contact us for help)
+
+                    Otherwise, it is likely that semgrep is hitting the limit on only some
+                    files. In this case, you can try to set the limit on the amount of memory
+                    semgrep can use on each file with `--max-memory <memory>`. We recommend
+                    lowering this to a limit 70% of the available memory. For CI runs with
+                    interfile analysis, the default max-memory is 5000MB. Without, the default
+                    is unlimited.
+
+                    The last thing you can try if none of these work is to raise the stack
+                    limit with `ulimit -s <limit>`.
+
+                    If you have tried all these steps and still are seeing this error, please
+                    contact us.
+
+                       Error: semgrep-core exited with unexpected output
+
+                       !!!This is a proprietary extension of semgrep.!!!
+!!!You should not call directly this program.!!!
+[00.06][INFO]: Executed as: /usr/local/Cellar/semgrep/1.102.0/libexec/lib/python3.13/site-packages/semgrep/bin/semgrep-core-proprietary -json -check_rules /var/folders/fw/gshm6l712cg8n14pybh9vkl80000gn/T/tmp6wnovhtz.yaml r/ash982.go-cross-file-taint
+[00.06][INFO]: Version: 1.102.0
+Fatal error: exception Sys_error("r/ash982.go-cross-file-taint: No such file or directory")
+Raised by primitive operation at UFile.Legacy.files_of_dirs_or_files_no_vcs_nofilter.(fun) in file "OSS/libs/commons/UFile.ml", line 156, characters 14-33
+Called from List_.fast_map in file "OSS/libs/commons/List_.ml", line 81, characters 17-20
+Called from UFile.Legacy.files_of_dirs_or_files_no_vcs_nofilter in file "OSS/libs/commons/UFile.ml", line 154, characters 4-204
+Called from UFile.files_of_dirs_or_files_no_vcs_nofilter in file "OSS/libs/commons/UFile.ml", line 196, characters 2-74
+Called from File_type.files_of_dirs_or_files in file "OSS/libs/commons/File_type.ml", line 452, characters 2-52
+Called from Check_rule.run_checks in file "OSS/src/metachecking/Check_rule.ml", line 292, characters 4-145
+Called from Check_rule.check_files in file "OSS/src/metachecking/Check_rule.ml", line 341, characters 26-55
+Called from Stdlib__Fun.protect in file "fun.ml", line 33, characters 8-15
+Re-raised at Stdlib__Fun.protect in file "fun.ml", line 38, characters 6-52
+Called from Common.protect in file "OSS/libs/commons/Common.ml", line 61, characters 6-31
+Called from UCommon.main_boilerplate.(fun) in file "OSS/libs/commons/UCommon.ml", line 129, characters 20-24
+Called from UCommon.pp_do_in_zero_box in file "OSS/libs/commons/UCommon.ml", line 71, characters 2-6
+Called from Stdlib__Fun.protect in file "fun.ml", line 33, characters 8-15
+Re-raised at Stdlib__Fun.protect in file "fun.ml", line 38, characters 6-52
+Called from Common.protect in file "OSS/libs/commons/Common.ml", line 61, characters 6-31
+Called from UCommon.exn_to_real_unixexit in file "OSS/libs/commons/UCommon.ml", line 64, characters 6-10
+Called from Dune__exe__Main in file "src/main/Main.ml", line 38, characters 2-813
