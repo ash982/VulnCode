@@ -49,18 +49,27 @@ def search_catalog():
         schema_validator.validate({"catalog_type": catalog_type, "owner": owner})
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+    
+    #secure way
+    # query = f"""
+    # SELECT * FROM `your-project-id.dataset.catalog`
+    # WHERE catalog_type = @catalog_type AND owner = @owner
+    # """
 
+    # job_config = bigquery.QueryJobConfig(
+    #     query_parameters=[
+    #         bigquery.ScalarQueryParameter("catalog_type", "STRING", catalog_type),
+    #         bigquery.ScalarQueryParameter("owner", "STRING", owner),
+    #     ]
+    # )
+
+    #insecure way
     query = f"""
     SELECT * FROM `your-project-id.dataset.catalog`
-    WHERE catalog_type = @catalog_type AND owner = @owner
+    WHERE catalog_type = catalog_type AND owner = owner
     """
-
-    job_config = bigquery.QueryJobConfig(
-        query_parameters=[
-            bigquery.ScalarQueryParameter("catalog_type", "STRING", catalog_type),
-            bigquery.ScalarQueryParameter("owner", "STRING", owner),
-        ]
-    )
+ 
+    job_config = None
 
     try:
         catalog_results = execute_query(query, job_config)
