@@ -94,18 +94,19 @@ def update_catalog():
     # """
 
    #insecure way 2
+   job_config = None
     query = f"""
     UPDATE `{}.{}` `your-project-id.dataset.catalog`
     SET data_field = "{}",
     WHERE catalog_id = "{}"
     """.format(data_field,catalog_id)
-    
-    job_config = bigquery.QueryJobConfig(
-        query_parameters=[
-            bigquery.ScalarQueryParameter("new_data", "STRING", new_data),
-            bigquery.ScalarQueryParameter("catalog_id", "STRING", catalog_id),
-        ]
-    )
+
+    # job_config = bigquery.QueryJobConfig(
+    #     query_parameters=[
+    #         bigquery.ScalarQueryParameter("new_data", "STRING", new_data),
+    #         bigquery.ScalarQueryParameter("catalog_id", "STRING", catalog_id),
+    #     ]
+    # )
 
     try:
         execute_query(query, job_config)
