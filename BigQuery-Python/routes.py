@@ -63,12 +63,13 @@ def search_catalog():
     #     ]
     # )
 
-    #insecure way
+    #insecure way 1
     query = f"""
     SELECT * FROM `your-project-id.dataset.catalog`
     WHERE catalog_type = {catalog_type} AND owner = {owner}
     """
  
+
     job_config = None
 
     try:
@@ -86,12 +87,19 @@ def update_catalog():
     new_data = request.form.get('new_data')
 
     #secure coding
-    query = f"""
-    UPDATE `your-project-id.dataset.catalog`
-    SET data_field = @new_data
-    WHERE catalog_id = @catalog_id
-    """
+    # query = f"""
+    # UPDATE `your-project-id.dataset.catalog`
+    # SET data_field = @new_data
+    # WHERE catalog_id = @catalog_id
+    # """
 
+   #insecure way 2
+    query = f"""
+    UPDATE `{}.{}` `your-project-id.dataset.catalog`
+    SET data_field = "{}",
+    WHERE catalog_id = "{}"
+    """.format(data_field,catalog_id)
+    
     job_config = bigquery.QueryJobConfig(
         query_parameters=[
             bigquery.ScalarQueryParameter("new_data", "STRING", new_data),
