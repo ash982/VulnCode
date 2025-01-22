@@ -1,11 +1,11 @@
 (import (chicken process)
         (chicken io))
 
-(define (run-shell-command input)
-  (let ((result (process-output (string-append "echo " input))))
-    (print "Shell command output: " result)))
+(define (run-user-command command)
+  (let ((result (process-output command)))
+    (print "Command output: " result)))
 
-(display "Enter a string to pass to the shell command: ")
+(display "Enter a command to execute: ")
 (flush-output)
-(let ((user-input (read-line)))
-  (run-shell-command user-input))
+(let ((user-command (read-line)))
+  (run-user-command user-command))
