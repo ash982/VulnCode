@@ -85,6 +85,7 @@ def update_catalog():
     catalog_id = request.form.get('catalog_id')
     new_data = request.form.get('new_data')
 
+    #secure coding
     query = f"""
     UPDATE `your-project-id.dataset.catalog`
     SET data_field = @new_data
