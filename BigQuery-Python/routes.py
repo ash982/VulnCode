@@ -45,10 +45,10 @@ def search_catalog():
     owner = request.form.get('owner')
 
     # Validate the input
-    try:
-        schema_validator.validate({"catalog_type": catalog_type, "owner": owner})
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+    # try:
+    #     schema_validator.validate({"catalog_type": catalog_type, "owner": owner})
+    # except ValueError as e:
+    #     return jsonify({"error": str(e)}), 400
     
     #secure way
     # query = f"""
