@@ -66,7 +66,7 @@ def search_catalog():
     #insecure way
     query = f"""
     SELECT * FROM `your-project-id.dataset.catalog`
-    WHERE catalog_type = catalog_type AND owner = owner
+    WHERE catalog_type = {catalog_type} AND owner = {owner}
     """
  
     job_config = None
