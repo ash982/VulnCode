@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/myproject/internal/class1"
-	"github.com/myproject/internal/class2"
+	"github.com/yourusername/myproject/internal/class1"
+	"github.com/yourusername/myproject/internal/class2"
 )
 
 func main() {
