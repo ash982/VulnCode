@@ -1,6 +1,7 @@
 import functions_framework
 import base64
 import json
+from bigquery_inserter import insert_to_bigquery
 
 @functions_framework.cloud_event
 def subscribe(cloud_event):
