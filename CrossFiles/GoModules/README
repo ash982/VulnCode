@@ -1,1 +1,11 @@
-
+myproject/
+├── cmd/
+│   └── main/
+│       └── main.go
+├── internal/
+│   ├── class1/
+│   │   └── class1.go
+│   └── class2/
+│       └── class2.go
+├── go.mod
+└── go.sum
