@@ -22,6 +22,3 @@ def subscribe(cloud_event):
     
     return "Message processed successfully", 200
 
-def insert_to_bigquery(customer, address):
-    # This function will be implemented in the second file
-    pass
