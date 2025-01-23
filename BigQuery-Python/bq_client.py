@@ -12,11 +12,11 @@ def execute_query(query, job_config=None):
        
         #insecure way 2
         job_config = None
-        query = f"""
-        UPDATE `{}.{}` `your-project-id.dataset.catalog`
-        SET data_field = "{}",
-        WHERE catalog_id = "{}"
-        """.format(data_field,catalog_id)
+        query_job = client.query(f"""
+            UPDATE `{}.{}` `your-project-id.dataset.catalog`
+            SET data_field = "{}",
+            WHERE catalog_id = "{}"
+        """.format(data_field,catalog_id))
 
         results = query_job.result()
         return [dict(row) for row in results]
