@@ -8,12 +8,16 @@ class InputProcessor {
     private $obj1;
     private $obj2;
 
+
     public function __construct($taintedInput) {
         $this->taintedInput = $taintedInput;
         $this->obj1 = new Class1($taintedInput);
         $this->obj2 = new Class2($taintedInput);
     }
 
+    /**
+     * @external
+     */
     public function process() {
         $this->obj1->processInput();
         $this->obj2->processInput();
