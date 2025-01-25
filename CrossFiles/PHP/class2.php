@@ -10,9 +10,6 @@ class Class2 {
         $this->db = new DatabaseConnection();
     }
 
-    /**
-     * @external
-     */
     public function processInput() {
         echo "Class2 processing: " . $this->input . "\n";
         
