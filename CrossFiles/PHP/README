@@ -1,0 +1,6 @@
+Test case: 
+1)single file analysis - input-singfile.php
+
+2) cross-file anaysis
+2.1) detect request object as the source
+2.2) ignore the request object use the annotation in comment "@external" as the source 
