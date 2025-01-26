@@ -14,3 +14,4 @@ class ShellCommand extends AbstractCommand {
         SystemCommand::run($command);
     }
 }
+?>
