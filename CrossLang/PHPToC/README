@@ -19,6 +19,7 @@ project/
 ├── README.md            # Instructions and documentation
 ├── Makefile             # Makefile to automate building the project
 
+command -> executor -> processor -> dispatcher -> system()
 ================================================================================================
 File Details
 1. src/ Directory
