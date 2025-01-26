@@ -1,7 +1,9 @@
+#include "install_ops.h"
 #include "sys.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 // Function to validate the name (basic validation example)
 char* validate(const char *name) {
@@ -17,16 +19,6 @@ char* validate(const char *name) {
     }
 
     return strdup(name);  // Return a duplicate of the safe name
-}
-
-// Function to execute a system command safely
-int sys_call(const char *cmd) {
-    if (cmd == NULL) {
-        return -1;  // Error: null command
-    }
-
-    int ret = system(cmd);
-    return WIFEXITED(ret) ? WEXITSTATUS(ret) : -1;
 }
 
 // Function to install the handler
@@ -45,7 +37,7 @@ int install_handler_imp(const char *name) {
     char cmd[256];
     snprintf(cmd, sizeof(cmd), "rm -rf %s", safe_name);
     
-    int result = sys_call(cmd);
+    int result = sys_call(cmd);  // Call the system command via sys.c
     free(safe_name);  // Free allocated memory
 
     return result;
