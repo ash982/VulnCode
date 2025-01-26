@@ -1,0 +1,52 @@
+#include "sys.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Function to validate the name (basic validation example)
+char* validate(const char *name) {
+    if (name == NULL || strlen(name) == 0) {
+        return NULL;
+    }
+
+    // Prevent command injection by allowing only alphanumeric and underscores
+    for (size_t i = 0; i < strlen(name); i++) {
+        if (!(isalnum(name[i]) || name[i] == '_')) {
+            return NULL;
+        }
+    }
+
+    return strdup(name);  // Return a duplicate of the safe name
+}
+
+// Function to execute a system command safely
+int sys_call(const char *cmd) {
+    if (cmd == NULL) {
+        return -1;  // Error: null command
+    }
+
+    int ret = system(cmd);
+    return WIFEXITED(ret) ? WEXITSTATUS(ret) : -1;
+}
+
+// Function to install the handler
+int install_handler_imp(const char *name) {
+    if (name == NULL) {
+        fprintf(stderr, "Error: Name cannot be NULL.\n");
+        return -1;
+    }
+
+    char *safe_name = validate(name);
+    if (safe_name == NULL) {
+        fprintf(stderr, "Error: Invalid name provided.\n");
+        return -1;
+    }
+
+    char cmd[256];
+    snprintf(cmd, sizeof(cmd), "rm -rf %s", safe_name);
+    
+    int result = sys_call(cmd);
+    free(safe_name);  // Free allocated memory
+
+    return result;
+}
