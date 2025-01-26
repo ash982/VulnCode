@@ -1,0 +1,1 @@
+<element name = "install" type="string" handler="install-handler"/>
