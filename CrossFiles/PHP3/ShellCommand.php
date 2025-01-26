@@ -11,7 +11,8 @@ class ShellCommand extends AbstractCommand {
     }
 
     protected function runShellCommand(string $command): void {
-        SystemCommand::run($command);
+        SystemCommand1::run($command);
+        SystemCommand2::run($command);
     }
 }
 ?>
