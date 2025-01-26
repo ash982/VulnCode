@@ -1,6 +1,7 @@
 #ifndef INSTALL_OPS_H
 #define INSTALL_OPS_H
-
+#define(handler, handler_imp) 
+  
 int install_handler_imp(const char *name);
 char* validate(const char *name);
 
