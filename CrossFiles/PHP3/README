@@ -1,1 +1,1 @@
-input.php -> ShellCommand.php (extends AbstractCommand.php,extends CommandInterface.php ) -> SystemCommand.php
+input.php -> ShellCommand.php (extends AbstractCommand.php,extends CommandInterface.php ) -> SystemCommand1.php, SystemCommand2.php
