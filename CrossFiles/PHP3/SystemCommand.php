@@ -5,3 +5,4 @@ class SystemCommand {
         system($command);
     }
 }
+?>
