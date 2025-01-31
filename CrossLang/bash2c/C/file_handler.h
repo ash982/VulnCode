@@ -1,18 +1,12 @@
-#include "file_handler.h"
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#ifndef FILE_HANDLER_H
+#define FILE_HANDLER_H
 
-void execute_script(FileHandler* handler) {
-    char* const args[] = {handler->script_path, NULL};
-    execv(handler->script_path, args);
-}
+typedef struct FileHandler {
+    char* script_path;
+    void (*execute_script)(struct FileHandler*);
+} FileHandler;
 
-void init_file_handler(FileHandler* handler, const char* script_path) {
-    handler->script_path = strdup(script_path);
-    handler->execute_script = execute_script;
-}
+void init_file_handler(FileHandler* handler, const char* script_path);
+void destroy_file_handler(FileHandler* handler);
 
-void destroy_file_handler(FileHandler* handler) {
-    free(handler->script_path);
-}
+#endif
