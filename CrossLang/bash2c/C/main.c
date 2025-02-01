@@ -5,7 +5,7 @@
 
 int main() {
     FileHandler handler;
-    init_file_handler(&handler, "./remove_xml_2020.sh");
+    init_file_handler(&handler, "./../bash/remove_xml_2020.sh");
 
     pid_t pid = fork();
 
