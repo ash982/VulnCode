@@ -30,17 +30,18 @@
    }
 
    predicate isSink(DataFlow::Node sink) {
-     exists(ExecuteCall ec |
-         sink = ec.getArg(0)
+     exists(ExecuteCall ec, Keyword k |
+         sink = ec.getArg(0) and ec.asExpr().(Call).getArg(_) = k.getAChildNode() and k.getValue().toString() = "True"
+         and k.getArg() = "shell"
         )
    }
 
    predicate isBarrier(DataFlow::Node sanitizer) {
-    isShellFalse()
-    and
+    isShellFalse() //this not working
+     and
     sanitizer = API::moduleImport("shlex").getMember("quote").getACall() 
-    or 
-    sanitizer = API::moduleImport("re").getMember("match").getACall() 
+     or 
+    sanitizer = API::moduleImport("re").getMember("match").getACall() //this not working in a if clause
     
    }
    additional predicate isShellFalse() {
