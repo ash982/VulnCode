@@ -44,7 +44,7 @@ class Class3:
         cmd = self.input
         pattern = r"^ls\s+=\w+$"
         if re.match(pattern, cmd):
-            p = subprocess.Popen(cmd, shell=False,
+            p = subprocess.Popen(cmd, shell=True,
                         stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT)   
             print("safe ls command")
