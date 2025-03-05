@@ -30,28 +30,25 @@
    }
 
    predicate isSink(DataFlow::Node sink) {
-     exists(ExecuteCall ec, Keyword k |
-         sink = ec.getArg(0) and ec.asExpr().(Call).getArg(_) = k.getAChildNode() and k.getValue().toString() = "True"
-         and k.getArg() = "shell"
-        )
+     exists(ExecuteCall ec |
+        sink = ec.getArg(0) 
+        and
+        (ec.getArgByName("shell").asExpr().(BooleanLiteral).booleanValue() = true)
+     )    
    }
 
    predicate isBarrier(DataFlow::Node sanitizer) {
-    isShellFalse() //this not working
-     and
-    sanitizer = API::moduleImport("shlex").getMember("quote").getACall() 
-     or 
-    sanitizer = API::moduleImport("re").getMember("match").getACall() //this not working in a if clause
+    sanitizer = API::moduleImport("shlex").getMember("quote").getACall().getArg(_) 
+    or 
+    sanitizer = API::moduleImport("re").getMember("match").getACall().getArg(_) 
     
    }
-   additional predicate isShellFalse() {
-    exists(Keyword k | k.getArg() = "shell" and k.getValue().toString() = "False") 
-
-   } 
 
   //  predicate isBarrierIn(DataFlow::Node node) { isSource(node) } 
 
- } 
+} 
+
+
 
  module MyFlow = TaintTracking::Global<MyConfig>; 
 
