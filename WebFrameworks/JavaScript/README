@@ -6,7 +6,8 @@ Client-side frameworks:
   Vue.js: Praised for its simplicity and gentle learning curve
   Svelte: Offers a unique approach to building user interfaces with less boilerplate
   Ember.js: Provides a complete solution for building ambitious web applications
-  SAPUI5 is primarily a client-side JavaScript framework. It's designed to run in the browser. It has built-in support for OData, facilitating communication with server-side data sources.
+  Handlebars
+  SAPUI5: from SAP. It is primarily a client-side JavaScript framework. It's designed to run in the browser. It has built-in support for OData, facilitating communication with server-side data sources.
 
 Server-side frameworks:
   Express.js: A minimal and flexible Node.js web application framework
