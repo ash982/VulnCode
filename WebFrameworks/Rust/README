@@ -1,0 +1,17 @@
+Rust offers an exciting and growing ecosystem of frameworks for various development needs. Here are some popular Rust frameworks:
+
+Actix: A powerful, pragmatic, and fast web framework for Rust.
+Rocket: An easy-to-use web framework with a focus on simplicity and speed.
+Tokio: A runtime for writing reliable asynchronous applications with Rust.
+Warp: A super-easy, composable web server framework for warp speeds.
+Yew: A modern web framework for creating multi-threaded front-end web apps with WebAssembly.
+Diesel: A safe, extensible ORM and Query Builder for Rust.
+Axum: A modular web framework built on top of Tokio, Tower, and Hyper.
+Tide: A minimal and pragmatic Rust web application framework built for rapid development.
+Juniper: A GraphQL server library for Rust.
+Gotham: A flexible web framework that promotes stability, safety, security and speed.
+
+These frameworks showcase Rust's strengths in performance, safety, and concurrency. They provide developers with robust tools to build efficient, secure, and scalable applications across various domains, from web services to system programming. The growing popularity of these frameworks reflects the increasing adoption of Rust in modern software development.
+
+
+
