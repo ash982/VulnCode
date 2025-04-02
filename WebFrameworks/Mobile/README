@@ -32,3 +32,12 @@ Vapor: Server-side Swift framework, useful for backend services
 These frameworks showcase the rich capabilities available to iOS developers, offering tools for everything from UI design to machine learning and augmented reality. They empower developers to create sophisticated, high-performance apps that take full advantage of iOS devices' features. The diverse range of frameworks reflects the continuous innovation in the iOS development landscape, providing exciting opportunities for creating cutting-edge mobile applications.
 
 
+====================================
+
+Kony, now part of Temenos, is a robust mobile application development platform. It supports multiple programming languages, enhancing its versatility for developers. The primary languages used in Kony development are:
+
+JavaScript: For app logic and functionality
+XML: For defining user interface layouts
+Java: For native Android development
+Objective-C and Swift: For native iOS development
+Kony's multi-language support allows developers to create sophisticated, cross-platform mobile applications efficiently. Its ability to work with both web technologies and native languages provides flexibility in app development approaches. This versatility makes Kony a powerful tool for businesses looking to develop comprehensive mobile solutions across various platforms.
