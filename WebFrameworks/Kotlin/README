@@ -1,0 +1,14 @@
+Kotlin offers a rich ecosystem of frameworks that leverage its modern features and interoperability with Java. Here are some popular Kotlin frameworks:
+
+Ktor: A lightweight framework for building asynchronous servers and clients
+Spring Boot: Widely used for creating microservices and web applications
+Android SDK: For developing native Android applications
+Exposed: A lightweight SQL library for Kotlin
+KotlinTest: A flexible and comprehensive testing framework
+Kodein: A pragmatic dependency injection framework
+TornadoFX: JavaFX framework for building desktop applications
+Koin: A pragmatic lightweight dependency injection framework
+Vertx: A toolkit for building reactive applications on the JVM
+Arrow: Functional programming library for Kotlin
+
+These frameworks showcase Kotlin's versatility across various domains, from web development to Android apps and desktop applications. They provide developers with powerful tools to create efficient, scalable, and feature-rich applications while taking advantage of Kotlin's modern language features. This diverse ecosystem reflects the growing adoption and maturity of Kotlin in the software development landscape.
