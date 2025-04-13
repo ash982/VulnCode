@@ -32,7 +32,7 @@
     //  source = API::moduleImport("socket").getMember("socket").asSource()  //return "socket.socket"
     //  source = API::moduleImport("socket").getMember("socket").getASuccessor().asSource() //return "socket.socket(socket.AF_INET, socket.SOCK_DGRAM)"
     //  source = API::moduleImport("socket").getMember("socket").getASuccessor().getASuccessor().asSource() //return "s.bind", "s.recvfrom", "s.sendto"
-     source = API::moduleImport("socket").getMember("socket").getASuccessor().getASuccessor().getACall() //use AST tree
+     source = API::moduleImport("socket").getMember("socket").getASuccessor().getASuccessor().getACall() //use AST tree, the default source does not include socket, how to modle it in yaml?
 
    }
 
