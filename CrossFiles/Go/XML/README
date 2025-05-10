@@ -1,0 +1,26 @@
+Go XML Injection
+references: https://owasp.org/www-chapter-vancouver/assets/presentations/2020-08_Golang_XXE.pdf
+
+1. Native XML parser
+1.1 xml.Unmarshal
+Usage Scenario
+simple cases where the entire XML content is readily available in memory and security concerns are minimal
+
+1.2 xml.NewDecoder
+Usage Scenario
+handling large XML files, streaming data, or when security is paramount, as it allows for more control over the parsing process and resource management.
+
+
+Vulnerabilities:
+1) XML External Entity (XXE) Injection:
+Disable entity
+
+2) Denial of Service (DoS) from excessively large or deeply nested XML (XML Bomb/Billion Laughs Attack):
+Limit Input Size and Complexity: Implement checks to restrict the size and nesting depth of XML documents to prevent DoS attacks.
+
+3) Round-trip Vulnerabilities
+Avoid Round-trips:
+If possible, avoid parsing and re-serializing XML data, as this can introduce vulnerabilities. If round-trips are necessary, carefully validate and sanitize the data before and after each step.
+
+
+2. 3rd party parser
