@@ -26,7 +26,8 @@ Use only if you need direct and advanced access to libxml2 APIs.
 Enable entity parsing: XML_PARSE_NOENT
 
 ==============================================================
-Vulnerabilities:
+Vulnerabilities when parsing untrusted or potentially malicious XML: 
+
 1) XML External Entity (XXE) Injection:
 Disable entity parsing
 
