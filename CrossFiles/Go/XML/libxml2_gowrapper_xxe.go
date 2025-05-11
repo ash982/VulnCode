@@ -13,8 +13,12 @@ func main() {
 		<data>&xxe;</data>
 	</root>`
 
-	//XMLParseNoEnt: enable parsing of external entities during XML parsing. This is vulnerable XML External Entity (XXE) attacks.
+	//Secure by default parsing: disable external entity resolution
+	// p := parser.New()
+
+	//Insecure: set XMLParseNoEnt, enable parsing of external entities during XML parsing. This is vulnerable XML External Entity (XXE) attacks.
 	p := parser.New(parser.XMLParseNoEnt)
+
 	doc, err := p.ParseReader(strings.NewReader(xmlContent))
 	if err != nil {
 		fmt.Println("Error parsing XML:", err)
