@@ -1,2 +1,8 @@
 1. Golang calls C:
-import "C"
+Go file: import "C"
+
+2. Python calls C:
+Python file: import shell_exec
+
+3. PHP calls C:
+PHP file: 
