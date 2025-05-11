@@ -1,0 +1,13 @@
+Vulnerabilities when parsing untrusted or potentially malicious XML: 
+
+1) XML Entity Injection (internal and external entity):
+Remediation: Disable entity parsing
+
+2) Denial of Service (DoS) from excessively large or deeply nested XML (XML Bomb/Billion Laughs Attack):
+Remediation: Limit Input Size and Complexity: Implement checks to restrict the size and nesting depth of XML documents to prevent DoS attacks.
+
+3) Round-trip Vulnerabilities
+Remediation: 
+Avoid Round-trips. If possible, avoid parsing and re-serializing XML data, as this can introduce vulnerabilities. 
+If round-trips are necessary, carefully validate and sanitize the data before and after each step.
+
