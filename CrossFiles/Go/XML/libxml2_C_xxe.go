@@ -24,12 +24,17 @@ func main() {
 	// doc := C.xmlReadMemory(xmlStr, C.int(len(C.GoString(xmlStr))), nil, nil, 0)
 
 	// Insecure: Parse untrusted XML with entity substitution enabled
+	// XML_PARSE_NOENT: this option enables substitution of entities
+	// XML_PARSE_NO_XXE: option to disables loading of external DTDs or entities.
+	// XML_PARSE_NONET: Disable network access with the built-in HTTP or FTP clients (no external entity)
+	// XML_PARSE_NOENT | XML_PARSE_NONET: only allow internal entity substitution
+	
 	doc := C.xmlReadMemory(
 		xmlStr,                         // XML string
 		C.int(len(C.GoString(xmlStr))), // Length of XML string
 		nil,                            // URL (optional)
 		nil,                            // Encoding (optional)
-		C.XML_PARSE_NOENT,              // Parse external entities
+		C.XML_PARSE_NOENT,              // Enables substitution of entities (both internal and external)
 	)
 	if doc == nil {
 		fmt.Println("Error parsing XML")
