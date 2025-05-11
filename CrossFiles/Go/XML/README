@@ -1,5 +1,10 @@
 Go XML Injection
-references: https://owasp.org/www-chapter-vancouver/assets/presentations/2020-08_Golang_XXE.pdf
+references: 
+https://owasp.org/www-chapter-vancouver/assets/presentations/2020-08_Golang_XXE.pdf
+https://gnome.pages.gitlab.gnome.org/libxml2/html/parser_8h.html
+
+Summary: 
+Go standard encoding/xml parser is not vulnerable to entity injection (block & for entity reference), but entity injection is still possible when using popular package libxml for advanced xml parsing. 
 
 1. Golang Standard/Native XML parser
 Ideal for lightweight XML processing. By default, XXE is blocked.
@@ -39,6 +44,3 @@ Use only if you need direct and advanced access to libxml2 APIs.
 Dangerous, enable entity parsing: XML_PARSE_NOENT
 
 =========================================
-
-Reference:
-https://gnome.pages.gitlab.gnome.org/libxml2/html/parser_8h.html
