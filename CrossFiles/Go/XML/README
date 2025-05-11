@@ -3,37 +3,42 @@ references: https://owasp.org/www-chapter-vancouver/assets/presentations/2020-08
 
 1. Golang Standard/Native XML parser
 Ideal for lightweight XML processing. By default, XXE is blocked.
+Go's Protection Against Entity Injection
+Go's encoding/xml package has built-in protections against entity injection attacks, regardless of the Strict setting:
+
+External entities are disabled by default: Go's XML parser doesn't resolve external entities by default
+Custom entity handling: The decoder.Entity map controls how entities are processed
+
 1.1 xml.Unmarshal
 Usage Scenario
 simple cases where the entire XML content is readily available in memory and security concerns are minimal
-
+-------------------------------
 1.2 xml.NewDecoder
 Usage Scenario
 handling large XML files, streaming data, or when security is paramount, as it allows for more control over the parsing process and resource management.
-Enable entity parsing: XMLParseNoEnt
+Go's encoding/xml package has built-in protections against entity injection attacks, regardless of the Strict setting:
 
+External entities are disabled by default: Go's XML parser doesn't resolve external entities by default (Error: XML syntax error on line 5: invalid character entity &xxe;)
+Custom entity handling: The decoder.Entity map controls how entities are processed
+
+=========================================
 2. 3rd party parser
 Best for most use cases where performance and ease of use are important.
 Go Wrapper Libraries, libxml2 is a widely-used library in C for parsing XML documents
 
+Dangerous, enable entity parsing: XMLParseNoEnt
+
 go get github.com/lestrrat-go/libxml2
 go run libxml2_gowrapper_xxe.go
 
-
+=========================================
 3. Use CGO for Direct Interaction
 For advanced use cases, you can use CGO to directly interact with the libxml2 library. This requires writing C bindings in your Go code, but it provides full access to all features of libxml2.
 Use only if you need direct and advanced access to libxml2 APIs.
-Enable entity parsing: XML_PARSE_NOENT
 
-==============================================================
-Vulnerabilities when parsing untrusted or potentially malicious XML: 
+Dangerous, enable entity parsing: XML_PARSE_NOENT
 
-1) XML Entity Injection (internal and external entity):
-Disable entity parsing
+=========================================
 
-2) Denial of Service (DoS) from excessively large or deeply nested XML (XML Bomb/Billion Laughs Attack):
-Limit Input Size and Complexity: Implement checks to restrict the size and nesting depth of XML documents to prevent DoS attacks.
-
-3) Round-trip Vulnerabilities
-Avoid Round-trips:
-If possible, avoid parsing and re-serializing XML data, as this can introduce vulnerabilities. If round-trips are necessary, carefully validate and sanitize the data before and after each step.
+Reference:
+https://gnome.pages.gitlab.gnome.org/libxml2/html/parser_8h.html
