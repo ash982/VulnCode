@@ -28,7 +28,7 @@ Enable entity parsing: XML_PARSE_NOENT
 ==============================================================
 Vulnerabilities when parsing untrusted or potentially malicious XML: 
 
-1) XML External Entity (XXE) Injection:
+1) XML Entity Injection (internal and external entity):
 Disable entity parsing
 
 2) Denial of Service (DoS) from excessively large or deeply nested XML (XML Bomb/Billion Laughs Attack):
