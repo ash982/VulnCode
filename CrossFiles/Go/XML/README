@@ -1,7 +1,8 @@
 Go XML Injection
 references: https://owasp.org/www-chapter-vancouver/assets/presentations/2020-08_Golang_XXE.pdf
 
-1. Native XML parser
+1. Golang Standard/Native XML parser
+Ideal for lightweight XML processing. By default, XXE is blocked.
 1.1 xml.Unmarshal
 Usage Scenario
 simple cases where the entire XML content is readily available in memory and security concerns are minimal
@@ -9,7 +10,6 @@ simple cases where the entire XML content is readily available in memory and sec
 1.2 xml.NewDecoder
 Usage Scenario
 handling large XML files, streaming data, or when security is paramount, as it allows for more control over the parsing process and resource management.
-
 
 Vulnerabilities:
 1) XML External Entity (XXE) Injection:
@@ -24,3 +24,13 @@ If possible, avoid parsing and re-serializing XML data, as this can introduce vu
 
 
 2. 3rd party parser
+Best for most use cases where performance and ease of use are important.
+Go Wrapper Libraries, libxml2 is a widely-used library in C for parsing XML documents
+
+go get github.com/lestrrat-go/libxml2
+go run libxml2_gowrapper_xxe.go
+
+
+3. Use CGO for Direct Interaction
+For advanced use cases, you can use CGO to directly interact with the libxml2 library. This requires writing C bindings in your Go code, but it provides full access to all features of libxml2.
+Use only if you need direct and advanced access to libxml2 APIs.
