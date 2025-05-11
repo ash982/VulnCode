@@ -1,0 +1,2 @@
+1. Golang calls C:
+import "C"
