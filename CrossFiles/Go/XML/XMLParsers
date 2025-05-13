@@ -6,6 +6,7 @@ https://gnome.pages.gitlab.gnome.org/libxml2/html/parser_8h.html
 Summary: 
 Go standard encoding/xml parser is not vulnerable to entity injection (block & for entity reference), but entity injection is still possible when using popular package libxml for advanced xml parsing. 
 
+=========================================
 1. Golang Standard/Native XML parser
 Ideal for lightweight XML processing. By default, XXE is blocked.
 Go's Protection Against Entity Injection
