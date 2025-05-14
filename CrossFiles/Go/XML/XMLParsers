@@ -37,6 +37,9 @@ Dangerous, enable entity parsing: XMLParseNoEnt
 go get github.com/lestrrat-go/libxml2
 go run libxml2_gowrapper_xxe.go
 
+Dangerous, enable entity parsing: XML_PARSE_NOENT
+go get github.com/moovweb/gokogiri  (https://github.com/moovweb/gokogiri/blob/a1a828153468a7518b184e698f6265904108d957/xml/document.go#L52)
+
 =========================================
 3. Use CGO for Direct Interaction
 For advanced use cases, you can use CGO to directly interact with the libxml2 library. This requires writing C bindings in your Go code, but it provides full access to all features of libxml2.
