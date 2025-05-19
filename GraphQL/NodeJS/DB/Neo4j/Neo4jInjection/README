@@ -1,0 +1,10 @@
+Neo4j Injection Prevention
+1. Use Parameterized Queries
+The most important defense against Neo4j Cypher injection is to use parameterized queries instead of string concatenation.
+
+2. Use neo4j-graphql-js Properly
+The neo4j-graphql-js library handles parameterization internally when using @cypher directives, making it safer
+
+3. Input Validation
+Always validate and sanitize input before sending it to Neo4j
+
