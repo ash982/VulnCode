@@ -1,4 +1,4 @@
-# use Then use input_validation.js in your resolvers:
+# Then use inputValidation.js in your resolvers:
 const { validatePersonName } = require('../utils/inputValidation');
 const driver = require('../config/neo4j-config');
 
