@@ -1,4 +1,4 @@
-1. Choose a Framework/Library
+1. GraphQL - Choose a Framework/Library
 Depending on your language, here are popular GraphQL implementations:
 
 JavaScript/Node.js: apollo-server, express-graphql
@@ -8,3 +8,72 @@ Ruby: graphql-ruby
 PHP: graphql-php
 Go: gqlgen
 
+=====================
+GraphQL Advanced Topics
+1. Authentication & Authorization: 
+server-with-auth.js
+resolvers-with-auth.js
+
+2. Database Integration
+2.1 MongoDB example using Mongoose: book.js
+
+npm install mongoose
+Update resolvers to use MongoDB: resolvers-with-db.js
+
+2.2 Neo4j
+2.2.1. Install Required Packages
+npm install neo4j-driver neo4j-graphql-js
+
+2.2.2. Configure Neo4j Connection: neo4j-config.js
+
+2.2.3. Define Neo4j GraphQL Schema: neo4j-schema.js
+
+2.2.4. Set Up Neo4j Resolvers: neo4j-resolvers.js
+
+
+2.3 MySQL
+2.3.1. Install Required Packages
+npm install mysql2 sequelize
+
+2.3.2. Configure MySQL Connection: mysql-config.js
+
+2.3.3. Define MySQL Models: book.js, author.js
+
+2.3.4. Set Up Associations: associations.js
+
+2.3.5. Define MySQL GraphQL Schema: mysql-schema.js
+
+2.3.6. Create MySQL Resolvers: mysql-resolvers.js
+
+3. Combining Both Databases in a Single GraphQL Server
+3.1. Merge Schemas and Resolvers: index.js
+
+3.2. Set Up the Combined Server: server.js
+
+3.3. Example Queries
+Query Neo4j Data:
+query {
+  personByName(name: "Tom") {
+    name
+    born
+    acted_in {
+      title
+      released
+    }
+  }
+}
+
+Query MySQL Data:
+query {
+  authors {
+    id
+    name
+    books {
+      title
+      publishedYear
+    }
+  }
+}
+
+
+4. Error Handling: resolvers-with-error-handling.js
