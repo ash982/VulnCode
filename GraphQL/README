@@ -1,4 +1,4 @@
-GraphQL - Choose a Framework/Library
+1. GraphQL - Choose a Framework/Library
 Depending on your language, here are popular GraphQL implementations:
 
 JavaScript/Node.js: apollo-server, express-graphql
@@ -7,3 +7,21 @@ Java: graphql-java
 Ruby: graphql-ruby
 PHP: graphql-php
 Go: gqlgen
+
+
+2. Best Practices
+Structure your schema well: Group related fields, use interfaces and unions for complex types.
+
+Use pagination: For large collections, implement cursor-based pagination.
+
+Optimize resolvers: Avoid N+1 query problems using DataLoader.
+
+Versioning: GraphQL schema doesn't need explicit versioning; evolve it gradually.
+
+Use fragments: Encourage clients to use fragments for reusable parts of queries.
+
+Security: Implement depth limiting, query complexity analysis, and rate limiting.
+
+Documentation: Use schema descriptions to document your API.
+
+Testing: Write tests for your schema and resolvers.
