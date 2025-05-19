@@ -1,3 +1,4 @@
+# use parameterized queries instead of string concatenation.
 const driver = require('../config/neo4j-config');
 
 const neo4jResolvers = {
