@@ -1,0 +1,9 @@
+MySQL/SQL Injection Prevention
+1. Use ORM with Parameterized Queries
+Sequelize, like most ORMs, automatically parameterizes queries, providing protection against SQL injection: safe-mysql-resolvers.js
+
+2. Avoid Raw Queries When Possible
+If you must use raw queries, ensure you use parameterization: insecure_raw-query-mysql-resolvers.js
+
+
+3. Input Validation and Sanitization: mysql-validation.js, then use these valiation function
