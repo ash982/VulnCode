@@ -8,4 +8,4 @@ Class2 constructs an SQL query without proper sanitization, potentially leading 
 To run this code, you'd need to install the necessary dependencies and use ts-node:
 
 npm install sqlite3 @types/sqlite3 ts-node typescript
-ts-node main.ts "user input"
+ts-node main.ts "user input" 
