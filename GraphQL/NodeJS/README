@@ -21,6 +21,41 @@ Create resolvers to handle the queries and mutations: resolvers.js
 5. Start the Server
 node server.js
 
+-----------------------
+GraphQL server config
+
+1. playground: true refers to enabling the GraphQL Playground in the Apollo Server configuration.
+
+GraphQL Playground is an interactive, in-browser GraphQL IDE (Integrated Development Environment) that allows developers to:
+
+.Explore the GraphQL schema
+.Write and execute queries, mutations, and subscriptions
+.View documentation about the available types and operations
+.Test API requests directly in the browser
+.By setting playground: true, the application is enabling this development tool in the server configuration, making it available when accessing the GraphQL endpoint through a browser. This is typically used during development to help test and debug GraphQL operations.
+
+2. config.ENABLE_INTROSPECTION 
+When this value is true, it allows clients to query the GraphQL server for information about its schema (types, fields, queries, mutations, etc.) using introspection queries.
+When set to false, introspection is disabled, which means clients cannot query the server for its schema structure.
+Disabling introspection is a security measure commonly used in production environments. By turning it off, you make it harder for potential attackers to explore your API's capabilities and structure. However, this also means that tools like GraphQL Playground, Apollo Studio, and other clients that rely on introspection queries won't be able to discover and display the schema documentation.
+
+
+When playground: true but introspection: false (controlled by config.ENABLE_INTROSPECTION || false), there are some security considerations to be aware of:
+
+Risks and Implications
+.Limited Functionality: The GraphQL Playground will be accessible, but with introspection disabled, it won't be able to automatically discover and display the schema. This means the documentation explorer and schema-based autocompletion won't work properly.
+
+.Security Posture: While disabling introspection is a security best practice that prevents attackers from easily discovering your API structure, leaving the playground enabled still exposes an interactive interface to your API.
+
+.Inconsistent Developer Experience: Developers accessing the playground will have a degraded experience since they can't explore the schema, which defeats much of the purpose of having the playground available.
+
+.Potential for Targeted Queries: Even without introspection, someone with knowledge of your API structure could still use the playground to craft and execute queries against your API.
+
+.Authentication Bypass Concerns: If authentication is not properly enforced at the playground level, it could potentially allow unauthenticated access to the interactive interface.
+
+If you need these features in specific non-production environments, consider using environment-specific configuration rather than hard-coding playground: true.
+
+
 ======================================
 GraphQL Advanced Topics
 1. Authentication & Authorization: 
