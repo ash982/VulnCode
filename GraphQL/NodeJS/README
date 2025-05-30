@@ -1,5 +1,15 @@
 ======================================
 GraphQL Basic
+
+GraphQL - a layer between client and actual database. Backend database is usually NoSQL, namely mongodb, but sometimes classic SQL relational databases are used, e.g. PostgreSQL. 
+
+Resolver - GraphQL has variables that are supplied to the queries. If a resolver does not properly sanitize these variables before using in the target query to the database, 
+it is possible to inject malicious operators, i.e. turning it into an SQL injection. 
+If a NoSQL database is used, things are more complicated since you cannot juggle types due to the schema type definitions, in other words you won’t be able convert a string into an array for a mongodb injection. 
+
+resolvers which will map the data to the queries for the database of his choice. Resolvers may contain ACL-related flaws and IDORs
+
+
 1. Setup a Basic GraphQL Server
 Let's implement a basic GraphQL server using Node.js and Apollo Server:
 
