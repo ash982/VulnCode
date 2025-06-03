@@ -8,6 +8,36 @@ Ruby: graphql-ruby
 PHP: graphql-php
 Go: gqlgen
 
+2. Schema location
+The decision to store GraphQL schema definitions in .graphql files or in .js files can depend on various factors, including project preferences, tooling choices, and the nature of the GraphQL implementation. Here are some reasons why the schema might be stored in different file formats:
+
+2.1 Storing Schema in .graphql Files:
+Separation of Concerns: Storing the schema in .graphql files allows for a clear separation of API schema definitions from the server-side code. This separation can improve readability and maintainability, especially in larger projects with complex schemas.
+Tooling Support: .graphql files are directly supported by many GraphQL development tools and libraries. This file format enables easy integration with tools like Apollo Server, GraphQL Code Generator, and Apollo Client for generating types and documentation.
+Schema Stitching: When working with schema stitching or schema composition in a microservices architecture, having schema definitions in .graphql files enables easier composition and federation of multiple schemas.
+
+2.2 Storing Schema in .js Files:
+Programmatic Extensibility: Storing schema in .js files allows for programmatic manipulation and extensibility of the schema using JavaScript code. This can be useful for dynamic schema generation, schema stitching, or applying schema directives.
+Type Safety: By defining the schema in JavaScript, you can leverage type-checking tools like TypeScript or Flow to ensure type safety and consistency across your schema definition and resolver functions.
+Custom Logic: Storing the schema in .js files enables the incorporation of custom logic or dynamic schema generation based on runtime conditions or environment variables. For example, you can conditionally include or exclude certain parts of the schema.
+
+In many GraphQL projects, a combination of .graphql files for schema definitions and .js files for resolver functions and schema-building logic is often used to take advantage of both the declarative schema description in .graphql files and the programmatic flexibility of JavaScript.
+
+
+3. User controlled data
+3.1 context is populated with NodeJS express http request object "req"
+    const server = new ApolloServer({
+      schema: neoSchema.schema,
+      context: ({ req }) => ({ req }),
+    });
+
+3.2 GraphQL query arguments
+when using default resolver
+
+
+when using custom resolver
+
+
 
 2. Best Practices
 Structure your schema well: Group related fields, use interfaces and unions for complex types.
