@@ -1,0 +1,24 @@
+Security Considerations for AWS Lambda Event and Context
+In an AWS Lambda function with the signature def lambda_handler(event, context), the event parameter typically contains user-controlled data, while the context parameter is controlled by AWS.
+
+Event Parameter
+The event parameter is considered user-controllable because:
+
+It contains the data that triggers your Lambda function
+Depending on your Lambda's trigger source, it may contain:
+Direct user input (e.g., from API Gateway)
+Data from services that could originate from users (S3, DynamoDB, etc.)
+Messages from queues (SQS) or streams (Kinesis) that might contain user data
+Security Implications:
+
+You should always validate and sanitize data from the event parameter
+Treat event data as untrusted and potentially malicious
+Apply input validation, parameter checking, and proper encoding
+Context Parameter
+The context parameter is AWS-controlled and contains:
+
+Runtime information about the Lambda execution environment
+Function metadata (name, version, memory limits, etc.)
+AWS request IDs and other operational data
+While the context object is not directly user-controllable, some values might reflect user behavior (like request IDs tied to specific invocations).
+
