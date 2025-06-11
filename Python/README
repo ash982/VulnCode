@@ -1,0 +1,12 @@
+The extra comma in params = (flag_name, app, release_version,) is a Python syntax convention for creating tuples.
+
+In Python, this trailing comma after the last element of a tuple (or list, or dictionary) is optional but has some benefits:
+
+1. Readability and maintainability: It makes it clear that the structure is a tuple, especially when it spans multiple lines.
+
+2. Version control friendliness: When you need to add another parameter later, the diff will only show the added line, not a change to the existing line:
+
+3. Consistent style: Many Python style guides (including Google's and some interpretations of PEP 8) recommend this style, particularly for multi-line collections.
+
+4. Single-element tuple clarity: While not applicable in this case (since there are three elements), for a single-element tuple, the trailing comma is required to distinguish it from a parenthesized expression: (element,) vs (element).
+
