@@ -25,6 +25,26 @@ The context parameter is AWS-controlled and contains:
   AWS request IDs and other operational data
 
 While the context object is not directly user-controllable, some values might reflect user behavior (like request IDs tied to specific invocations).
+#####################################
+def my_handler(event, context):
+  my_custom_dict = context.client_context.custom
+#####################################
+
+The client_context object typically contains the following properties:
+
+.client - Information about the client application
+.custom - A dictionary for custom values set by the mobile client application
+.env - Environment information from the AWS Mobile SDK
+
+The code is accessing the custom dictionary from the client_context object. This custom dictionary contains user-defined values that were sent by the client application when invoking the Lambda function.
+client_context is only available when the function is invoked from the AWS Mobile SDK or AWS IoT.
+
+If your Lambda function is invoked through other means (such as the AWS Console, AWS CLI, or another AWS service), client_context might be None, which could cause your code to throw an error if it tries to access attributes without checking first.
+
+You should typically add validation before accessing client_context.
+
+
+
 
 
 Summary 
