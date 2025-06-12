@@ -1,0 +1,26 @@
+String formatting in constructing SQL Query:
+
+1) query = "SELECT name FROM fruits where id='%s'" % str(id)
+It uses the older Python string formatting style (using % operator) to insert the value of id into the query after converting it to a string with str().
+
+Safer version: 
+query = "SELECT name FROM fruits where id=%s"
+cursor.execute(query, (id,))
+
+2) query = (f"SELECT DISTINCT(name) FROM fruits WHERE version='{args}'")
+
+This code is constructing an SQL query string using Python's f-string formatting (introduced in Python 3.6) to fetch data from a database. 
+It uses an f-string (indicated by the f prefix before the string) to embed the value of the args variable directly into the query string.
+
+Safer version:
+query = "SELECT DISTINCT(name) FROM fruits WHERE release_version=%s"
+cursor.execute(query, (args,))
+
+3) query = ("REPLACE INTO fruits (id, app, options, "
+             "version) VALUES ('%s', '%s', '%s', '%s')" %
+
+
+Safer version: 
+query = ("REPLACE INTO tenant_feature_flags (id, app, options, "
+         “version) VALUES (%s, %s, %s, %s)")
+cursor.execute(query, (id, name, options, version))
