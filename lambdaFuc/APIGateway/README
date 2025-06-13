@@ -1,0 +1,21 @@
+API Gateway Invoking Lambda Functions:
+API Gateway can invoke AWS Lambda functions through an integration setup. Here's a comprehensive explanation of how this works:
+
+Overview of the Integration:
+API Gateway invokes Lambda functions through a request-response model:
+1.A client sends a request to an API Gateway endpoint
+2.API Gateway receives the request and forwards it to the connected Lambda function
+3.The Lambda function processes the request and returns a response
+4.API Gateway receives the Lambda response and forwards it back to the client
+
+Integration Types:
+API Gateway offers two main integration types for Lambda:
+1.Lambda Proxy Integration (AWS_PROXY) - Passes the entire request to Lambda without modification
+2.Lambda Custom Integration (AWS) - Allows you to transform the request/response using mapping templates
+
+How to Set Up Lambda Integration:
+Using the AWS Console
+1.Create a Lambda function
+2.Create an API Gateway REST API
+3.Create a resource and method (GET, POST, etc.)
+4.Set up Lambda integration
