@@ -17,7 +17,7 @@ You should always validate and sanitize data from the event parameter
 Treat event data as untrusted and potentially malicious
 Apply input validation, parameter checking, and proper encoding
 
-1.2 Context Parameter
+1.2 Context Parameter https://docs.aws.amazon.com/lambda/latest/dg/python-context.html
 The context parameter is AWS-controlled and contains:
 
   Runtime information about the Lambda execution environment
