@@ -1,0 +1,46 @@
+Lambda functions can be invoked in multiple ways. To determine how a specific Lambda function was invoked, you need to examine either the CloudWatch logs, CloudTrail events, or the Lambda event source configurations. Here are the common ways Lambda functions are invoked:
+
+Common Lambda Invocation Methods
+1.Synchronous invocation:
+
+Direct API calls using AWS SDK, CLI, or console
+API Gateway
+Application Load Balancer
+
+2.Asynchronous invocation:
+
+S3 events
+SNS notifications
+CloudWatch Events/EventBridge
+SES (Simple Email Service)
+
+3. Poll-based invocation:
+
+SQS (Simple Queue Service)
+Kinesis Data Streams
+DynamoDB Streams
+
+
+How to Check Invocation Method
+1. Check the Lambda console for event source mappings
+aws lambda list-event-source-mappings --function-name YOUR_FUNCTION_NAME
+
+
+2. View CloudTrail events to see who/what invoked the function
+aws cloudtrail lookup-events --lookup-attributes AttributeKey=ResourceName,AttributeValue=YOUR_FUNCTION_NAME
+
+
+3. Check CloudWatch logs for the event data
+aws logs filter-log-events --log-group-name /aws/lambda/YOUR_FUNCTION_NAME
+
+
+4. Examine the Lambda event object in your code
+In your Lambda function code, you can log the event object to see its structure, which often reveals the source:
+
+def lambda_handler(event, context):
+    print("Event:", event)  # This will show in CloudWatch logs
+    # The structure of the event object indicates the source
+    # ...
+
+
+
