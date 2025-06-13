@@ -1,5 +1,35 @@
 Using HCL in Terraform provides a powerful, declarative way to define and manage the mapping between your Lambda functions and API Gateway endpoints.
 =====================================================
+module "get_users_endpoint" {
+  source               = "./modules/api_endpoint"
+  rest_api_id          = aws_api_gateway_rest_api.example_api.id
+  parent_id            = aws_api_gateway_rest_api.example_api.root_resource_id
+  path_part            = "users"
+  http_method          = "GET"
+  lambda_function_arn  = aws_lambda_function.get_users_lambda.invoke_arn
+  lambda_function_name = aws_lambda_function.get_users_lambda.function_name
+}
+
+
+
+The Lambda function name is get_users_lambda (referring to the Terraform resource name) and the actual AWS Lambda function name would be defined in the aws_lambda_function resource, 
+typically through the function_name attribute:
+
+resource "aws_lambda_function" "get_users_lambda" {
+  function_name = "get-users-function"  # This is the actual Lambda function name in AWS
+  # other attributes...
+}
+
+So if we know the lambda function name "get-users-function", we just need to search in .hcl file:
+1. first look for the actual lambda function name
+aws_lambda_function.xxx
+or
+resource "aws_lambda_function" "get-users-function"
+
+2. Get the name of lambda function in resource block
+"get-users-function" -> "get_users_lambda"
+
+=====================================================
 Resource Block Syntax
 
 resource "TYPE" "NAME" {
@@ -40,27 +70,7 @@ module “store” {
 
 
 =====================================================
-module "get_users_endpoint" {
-  source               = "./modules/api_endpoint"
-  rest_api_id          = aws_api_gateway_rest_api.example_api.id
-  parent_id            = aws_api_gateway_rest_api.example_api.root_resource_id
-  path_part            = "users"
-  http_method          = "GET"
-  lambda_function_arn  = aws_lambda_function.get_users_lambda.invoke_arn
-  lambda_function_name = aws_lambda_function.get_users_lambda.function_name
-}
 
-
-
-The Lambda function name is get_users_lambda (referring to the Terraform resource name) and the actual AWS Lambda function name would be defined in the aws_lambda_function resource, 
-typically through the function_name attribute:
-
-resource "aws_lambda_function" "get_users_lambda" {
-  function_name = "get-users-function"  # This is the actual Lambda function name in AWS
-  # other attributes...
-}
-
-=====================================================
 resource "aws_api_gateway_integration" "integration" {
   rest_api_id             = var.rest_api_id
   resource_id             = aws_api_gateway_resource.resource.id
