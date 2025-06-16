@@ -1,0 +1,92 @@
+1. wildcard (*, ?, []) injection in shell script 
+Wildcard injection in shell scripts is a security vulnerability where attackers exploit the way the shell expands wildcard characters (*, ?, []) 
+to execute unintended commands or gain unauthorized access. This is particularly dangerous in automated scripts, cron jobs, or commands that run with elevated privileges.
+The vulnerability occurs when an attacker can create files with specially crafted filenames that contain command-line options (starting with a dash -).
+
+Impact: can lead to full system compromise.
+
+When a shell script uses a wildcard character in a command (e.g., rm *), the shell first expands the wildcard into a list of matching files before 
+executing the command. If an attacker can control the contents of the directory where the script is executed, they can create files with malicious names that, 
+when expanded by the wildcard, will inject unintended options or commands into the original command. 
+
+Example 1: Wildcard wildness
+Wildcards are interpreted by the shell before any other action is taken.
+if a file named "--help", run 'cat --help', it will display the content of the file but show the help doc of cat command.
+
+Example 2: File owner hijacking via Chown (change owner)
+Malicous user Tom created two files:
+echo "" > my.php
+echo > --reference=my.php this command creates (or overwrite if it exists) a file literally named '--reference=my.php' with empty content. 
+
+Now As you can observe when root user run chown command to give ownership to all the PHP files to Jim: 
+chown -R jim:jim *.php
+An error occurred and as result, the all PHP file get seized by Tom automatically.
+                                                
+Example 3: Tar wildcard injection
+Tar is a very common UNIX program for creating and extracting archives. 
+1) tar -cf /opt/backups/website.tar * to archive files,
+2) attacker can create files in the webroot named --checkpoint=1 and --checkpoint-action=exec=exploit.sh
+3) the shell will expand the * to include these files. The tar command will then be executed with the injected --checkpoint and --checkpoint-action flags, 
+   causing it to execute the attacker's exploit.sh script, potentially leading to privilege escalation. 
+
+–checkpoint[=NUMBER] show progress messages every Numbers record (default 10), would show a progress message after every NUMBER files processed
+–checkpoint-action=ACTION execute ACTION on each checkpoint
+
+
+Example 4: Tar wildcard injection
+schedule a task with help of crontab to run tar archival program for taking backup of /html from inside /var/backups in every 1 minute:
+nano /etc/crontab
+*/1 *   * * *   root tar -zcf /var/backups/html.tgz /var/www/html/*
+
+Schedule Part (First 5 Fields)
+*/1: Run every 1 minute
+*: Every hour
+*: Every day of the month
+*: Every month
+*: Every day of the week
+
+User Part
+root: The command will be executed with root privileges
+
+Command Part
+tar -zcf /var/backups/html.tgz /var/www/html/*: Creates a compressed tar archive
+
+The command specifically:
+tar: The archiving utility
+-z: Compress the archive using gzip
+-c: Create a new archive
+-f: Specify the filename of the archive
+/var/backups/html.tgz: The destination file (where the backup will be saved)
+/var/www/html/*: The source files/directories to backup (everything in the /var/www/html/ directory)
+
+Example 5:
+Assume a script or cron job that does something like:
+cd /some/directory && rm *
+
+An attacker with write access to that directory could create files like:
+touch -- "--delete-recursive"
+touch -- "--force"
+touch -- "/etc/important_file"
+
+When rm * runs, the shell expands to:
+rm --delete-recursive --force /etc/important_file
+
+This would cause rm to recursively delete the important file with force, even if it's outside the intended directory!
+
+
+
+Mitigation:
+1. The most effective way to prevent wildcard injection is to avoid using wildcards in commands that process user-controlled inputs or 
+   in directories where attackers can create files.
+
+2. Other mitigation techniques:
+   .Specify the full path: Use explicit paths instead of wildcards when possible. Instead of some_command *, use some_command /path/to/some/folder/*.
+   .Use quotes: Enclose wildcard patterns within single or double quotes to prevent shell expansion. Quote your wildcards: rm "./*" (this prevents direct option parsing)
+   .Implement input validation: Validate and sanitize user inputs to remove or escape wildcard characters.
+   .Use dedicated functions or modules: Utilize safer alternatives to shell commands, like subprocess.Popen with shell=False in Python. 
+
+In essence, be cautious when using wildcards in shell scripts and assume that any user-controlled input or writable directory could be manipulated by an attacker.
+
+References:
+https://www.hackingarticles.in/exploiting-wildcard-for-privilege-escalation/
+================================================================================
