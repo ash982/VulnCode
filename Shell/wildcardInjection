@@ -1,4 +1,5 @@
-1. wildcard (*, ?, []) injection in shell script 
+Wildcard (*, ?, []) injection in shell script 
+
 Wildcard injection in shell scripts is a security vulnerability where attackers exploit the way the shell expands wildcard characters (*, ?, []) 
 to execute unintended commands or gain unauthorized access. This is particularly dangerous in automated scripts, cron jobs, or commands that run with elevated privileges.
 The vulnerability occurs when an attacker can create files with specially crafted filenames that contain command-line options (starting with a dash -).
