@@ -3,9 +3,9 @@ Lambda functions can be invoked in multiple ways. To determine how a specific La
 Common Lambda Invocation Methods
 1.Synchronous invocation:
 
-Direct API calls using AWS SDK, CLI, or console
-API Gateway
-Application Load Balancer
+.Direct API calls using AWS SDK, CLI, or console
+.API Gateway (clinet -> API Gateway -> lambda functions)
+.Application Load Balancer
 
 2.Asynchronous invocation:
 
