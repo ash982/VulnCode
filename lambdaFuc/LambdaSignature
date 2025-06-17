@@ -1,0 +1,16 @@
+To determine if a given function is an AWS Lambda function handler, there are several characteristics to look for:
+
+1. The most obvious sign is the function name lambda_handler, which is a common convention for AWS Lambda handlers in Python (but can be any function name).
+
+2. The parameter signature with event and context parameters is the standard signature for AWS Lambda handlers (typically 'event' and 'context' but can be any parameter names).
+   The pattern you provided def lambda_handler(event, context): is indeed the standard signature for an AWS Lambda function handler in Python. 
+   AWS Lambda looks for this specific function name by default when executing Python code, though you can configure a different handler name if needed.
+
+3. Order of parameters: first one is event, the 2nd one is context
+
+4. Number of parameters: should be 2
+
+5. Additional context can help confirm it, such as:
+   .Is it in a file that's deployed to AWS Lambda?
+   .Does the function contain logic to process an event and return a response?
+   .If it behind AWS API Gateway, check .hcl, .yaml. .tf configuration files (configuration files define and configure infrastructure resources)
