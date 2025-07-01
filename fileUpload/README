@@ -1,0 +1,106 @@
+it is possible to export/write files to a symlink! When you write to a symlink, the data is actually written to the target file that the symlink points to.
+
+Important considerations:
+The symlink must point to a valid location - if the target doesn't exist, you may get an error
+Permissions matter - you need write permissions on the target file, not just the symlink
+Broken symlinks - writing to a broken symlink will typically create the target file if the directory exists
+
+
+1)Relative Path Enforcement:
+Security measure: Only allows relative paths
+Prevents users from specifying absolute paths like /etc/passwd or C:\Windows\system32\
+
+
+2)Path Resolution
+Combines the application's data directory with the user-provided relative path
+
+
+3)Security Checks:
+Directory Traversal Prevention: Blocks .. to prevent escaping the data directory
+
+Blocks: configs/../../../etc/passwd
+Symlink Prevention: Checks each path component for symbolic links
+
+Prevents symlink attacks where a symlink could point outside the allowed directory
+Example blocked scenario:
+ln -s /etc/passwd data/configs/malicious_link
+# This would be detected and blocked
+
+==============================================================
+Why These Security Measures?
+This prevents path traversal attacks and symlink attacks where malicious users could:
+
+Export configuration to system files
+Use symlinks to escape the intended directory sandbox
+Access sensitive files outside the application's data directory
+The code ensures configuration files can only be exported within the designated data directory structure.
+
+
+=================================================
+exporting files to symlinks can definitely lead to denial of service (DoS) attacks! Here are the main attack vectors:
+1. Disk Space Exhaustion
+# Attacker creates symlink to a location with limited space
+ln -s /tmp/config_export /data/configs/export.conf
+
+
+If /tmp has limited space, a large export could fill it up
+Could crash the system or other applications
+2. Infinite Loop/Recursive Symlinks
+# Create circular symlink reference
+ln -s /data/configs/link1 /data/configs/link2
+ln -s /data/configs/link2 /data/configs/link1
+
+
+Application might follow symlinks indefinitely
+Consumes CPU and memory resources
+3. Slow Filesystem/Network DoS
+# Symlink pointing to slow network filesystem
+ln -s /mnt/slow_nfs_mount/file /data/configs/export.conf
+
+
+Export operation hangs waiting for slow I/O
+Ties up application threads/resources
+4. Resource-Intensive Locations
+# Symlink to special files that cause blocking
+ln -s /dev/urandom /data/configs/export.conf  # Could block reading
+ln -s /proc/kmsg /data/configs/export.conf     # Kernel message buffer
+
+
+5. Log File Pollution
+# Symlink to critical log files
+ln -s /var/log/syslog /data/configs/export.conf
+
+
+Overwrites important system logs
+Could hide attack traces or crash log monitoring
+6. Permission Escalation DoS
+# Symlink to files requiring elevated permissions
+ln -s /etc/shadow /data/configs/export.conf
+
+
+Causes permission errors that might not be handled gracefully
+Could crash the application or create error loops
+Why the Code Blocks Symlinks
+This is exactly why the code you showed earlier blocks symlinks:
+
+if (std::filesystem::is_symlink(path, ec)) {
+  throw CommandUsageException(fmt::format(
+      "Symbolic links are blocked: {}", current.string()));
+}
+
+
+Additional Protections
+To further prevent DoS when allowing file exports:
+
+// Additional safeguards you might implement
+- File size limits
+- Timeout for I/O operations  
+- Disk space checks before writing
+- Rate limiting on export operations
+- Sandboxing/chroot environments
+
+The symlink restriction is a critical security measure that prevents these DoS scenarios along with other security vulnerabilities.
+
+
+
+
