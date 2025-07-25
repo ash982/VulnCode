@@ -1,0 +1,24 @@
+Web Application Entry Points: external users -> entry points -> web app -> servers
+
+1. HTTP Requests:
+Web applications receive data through HTTP requests, which are sent by users or other applications. These requests contain data in the form of URLs, query parameters, headers, cookies, and form data. Each of these elements can be a potential entry point for malicious input. 
+
+2. API Endpoints:
+APIs (Application Programming Interfaces) expose specific functionalities to other applications. Each API endpoint acts as an entry point, allowing external applications to interact with the application's backend. 
+1) Typical API handlers from web framework
+3) GraphQL resolvers/handlers
+2) Serverless function as API handler: behind gateway like AWS lambda function / GCP cloud function
+
+
+3. File Uploads:
+When users upload files to a web application, the application must process and store these files. File upload functionalities are often vulnerable to attacks such as code injection or malware distribution. 
+
+4. User Input Forms:
+Forms used for user registration, login, or data input are also prime targets for attackers. Input validation and sanitization are essential to prevent SQL injection, cross-site scripting (XSS), and other attacks. 
+
+5. Third-Party Integrations:
+Integrating with third-party services or libraries can create new entry points. These integrations may introduce vulnerabilities if the third-party code is not properly secured or if data is not validated before being passed to the application. 
+
+6. Authentication and Authorization:
+The methods used for authentication and authorization (e.g., login pages, password reset functionalities) are also critical entry points. Weak authentication mechanisms can allow attackers to bypass security controls and gain unauthorized access. 
+
