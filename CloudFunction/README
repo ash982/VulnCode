@@ -1,0 +1,8 @@
+Cloud functions is GCP's serverless, event-driven compute platform that allows you to run code without managing servers, similar to AWS Lambda.
+
+Event-driven - triggered by http requests, cloud storage events, pub/sub messages, etc.
+Multiple triggers - HTTP, cloud storage, firestore, pub/sub, etc. 
+
+Supported Runtimes: 
+Node.js, Python, Go, Java, .NET, Ruby, PHP
+
