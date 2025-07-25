@@ -39,6 +39,8 @@ Cloud Spanner/SQL Integration:
 
 2. Multiple triggers - HTTP, cloud storage, firestore, pub/sub, etc. 
 
+
+
 Supported Runtimes: 
 Node.js, Python, Go, Java, .NET, Ruby, PHP
 
