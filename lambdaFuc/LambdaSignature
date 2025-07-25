@@ -8,9 +8,15 @@ To determine if a given function is an AWS Lambda function handler, there are se
 
 3. Order of parameters: first one is event, the 2nd one is context
 
-4. Number of parameters: should be 2
+4. Number of parameters: common case is 2, but can have more
 
 5. Additional context can help confirm it, such as:
    .Is it in a file that's deployed to AWS Lambda?
    .Does the function contain logic to process an event and return a response?
    .If it behind AWS API Gateway, check .hcl, .yaml. .tf configuration files (configuration files define and configure infrastructure resources)
+
+Examples:
+abc(event, context)
+cde(event, ctx)
+xyz(ctx, action, event)
+
