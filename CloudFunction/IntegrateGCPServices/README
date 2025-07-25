@@ -1,1 +1,8 @@
+Deploy your Cloud Function:
+
+gcloud run deploy get-albums-function \
+    --source . \
+    --region REGION \
+    --function-target get_albums \
+    --set-env-vars SPANNER_INSTANCE_ID="my-instance",SPANNER_DATABASE_ID="my-database"
 
