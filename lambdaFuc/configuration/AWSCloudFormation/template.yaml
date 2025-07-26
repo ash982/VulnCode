@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: A simple serverless API for managing items
+
+Resources:
+  MyPythonLambdaFunction:
+    Type: AWS::Serverless::Function  # SAM resource type for Lambda functions
+    Properties:
+      FunctionName: MyItemManagerFunction
+      Handler: lambda_function.lambda_handler  # <1>
+      Runtime: python3.9
+      CodeUri: s3://your-s3-bucket/path-to-your-code.zip  # <2>
+      MemorySize: 128
+      Timeout: 30
+      Policies:
+        - AmazonDynamoDBReadOnlyAccess # Example policy
+        - Statement: # Inline policy for custom permissions
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${MyPythonLambdaFunction}:*"
+      Environment: # <3>
+        Variables:
+          TABLE_NAME: !Ref MyDynamoDBTable # Example environment variable using a CloudFormation reference
+
+  MyDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: MyItemsTable
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  MyApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: MyItemManagerApi
+      StageName: Prod
+      DefinitionBody:
+        openapi: 3.0.1
+        info:
+          title: "MyItemManagerApi"
+          version: "1.0"
+        paths:
+          /items:
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MyPythonLambdaFunction.Arn}/invocations"
+              responses: {}
