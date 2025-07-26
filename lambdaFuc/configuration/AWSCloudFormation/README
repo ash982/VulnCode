@@ -1,4 +1,4 @@
-AWS CloudFormation (and AWS SAM) Example (YAML)：
+1. AWS CloudFormation (and AWS SAM) Example (YAML)：
 AWS SAM is built on CloudFormation and simplifies serverless deployments. Here's an example using SAM syntax in a template.yaml file
 Key Points:
 <1> Handler: This specifies the entry point for the Lambda function. For Python, it's file_name.function_name. Lambda will look for lambda_handler inside lambda_function.py.
