@@ -1,0 +1,4 @@
+Examples of how to define an AWS Lambda function using Infrastructure as Code (IaC) tools are provided. This is standard for modern cloud deployments. Examples using two IaC frameworks are:
+1)AWS CloudFormation (and AWS SAM): A native AWS service for deploying resources, often using YAML templates. 
+  AWS Serverless Application Model (SAM) is a framework that extends CloudFormation specifically for serverless applications, offering a simplified syntax.
+2)Terraform: An open-source, cloud-agnostic tool by HashiCorp, popular for managing resources across multiple cloud providers. 
