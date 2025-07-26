@@ -1,0 +1,2 @@
+AWS CloudFormation (and AWS SAM) Example (YAML)：
+AWS SAM is built on CloudFormation and simplifies serverless deployments. Here's an example using SAM syntax in a template.yaml file
