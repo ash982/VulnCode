@@ -9,10 +9,12 @@ APIs (Application Programming Interfaces) expose specific functionalities to oth
 2) GraphQL resolvers/handlers
 3) Serverless function as API handler: behind gateway like 
 AWS lambda function:
+https://github.com/ash982/VulnCode/tree/main/lambdaFuc
 https://docs.aws.amazon.com/lambda/latest/dg/lambda-samples.html
 https://docs.aws.amazon.com/lambda/latest/dg/python-handler.html#:~:text=LambdaDeveloper%20Guide-,Example%20Python%20Lambda%20function%20codeHandler%20naming%20conventionsUsing%20the,Service%20(Amazon%20S3)%20bucket.
 
 GCP cloud function 
+https://github.com/ash982/VulnCode/tree/main/CloudFunction
 https://cloud.google.com/run/docs/write-http-functions#node.js
 
 Azure Functions 
