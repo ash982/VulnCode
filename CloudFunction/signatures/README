@@ -1,1 +1,18 @@
+@functions_framework.http
+def get_albums(request):
+...
+The exact syntax and usage of @functions_framework.http is specific to Python because Python's decorator syntax (@) is a language feature. 
 
+However, the concept of defining a function that is triggered by an HTTP request exists across all the Cloud Functions runtimes, just with different implementations based on the language's conventions and available libraries. 
+
+Here's a breakdown by language: 
+https://cloud.google.com/run/docs/write-http-functions#node.js
+https://cloud.google.com/run/docs/write-event-driven-functions
+
+.Node.js, Go, Java, .NET, Ruby, PHP: These languages use their respective Functions Framework libraries to achieve the same result as the Python decorator.
+.Go: Uses funcframework.RegisterHTTPFunctionContext to register an HTTP function.
+.Java: Can configure the function using command-line arguments, buildfiles, or environment variables.
+.Ruby: Uses FunctionsFramework.http with a block to define the function, <<Link: according to GitHub https://github.com/GoogleCloudPlatform/functions-framework-ruby/blob/main/docs/writing-functions.md>>.
+.PHP: Can define a handler function to respond to HTTP requests, <<Link: says Alibaba Cloud https://www.alibabacloud.com/help/en/functioncompute/fc-2-0/user-guide/configure-an-http-trigger-that-invokes-a-function-with-http-requests>>. 
+
+The specific methods for defining HTTP-triggered functions in these languages are detailed in the Google Cloud documentation for <<Link: writing Cloud Run functions https://cloud.google.com/run/docs/write-functions>>
