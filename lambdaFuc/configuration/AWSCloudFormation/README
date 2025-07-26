@@ -1,2 +1,19 @@
 AWS CloudFormation (and AWS SAM) Example (YAML)：
 AWS SAM is built on CloudFormation and simplifies serverless deployments. Here's an example using SAM syntax in a template.yaml file
+Key Points:
+<1> Handler: This specifies the entry point for the Lambda function. For Python, it's file_name.function_name. Lambda will look for lambda_handler inside lambda_function.py.
+<2> CodeUri: This tells Lambda where to find the function code. It can be an S3 bucket location (as shown) for .zip file deployments or a path to a directory if using SAM CLI's local build capabilities.
+<3> Environment Variables: Environment variables can be defined for the Lambda function, making code more portable and helping to keep secrets out of the codebase.
+Policies: Define the necessary permissions for the Lambda function using IAM policies. The example shows both managed policies and inline policies. Amazon AWS Documentation provides more information on setting execution roles and access permissions. 
+
+
+
+2. Terraform Example (HCL)
+Here's an example using HashiCorp Configuration Language (HCL) in a .tf file for Terraform: 
+Key Points:
+<1> handler: Similar to CloudFormation, this property specifies the entry point function.
+<2> filename: The path to a local .zip file containing the Lambda code.
+source_code_hash: This is important for Terraform to detect changes in your code and trigger updates.
+<3> environment: Defines environment variables for the function. 
+Both examples show how IaC allows the definition of the Lambda function's handler, runtime, code location, permissions (via IAM roles and policies), and other configurations in a declarative and version-controlled manner, ensuring consistency and automation in deployments. Amazon Web Services discusses how AI code assistants can be used to translate infrastructure as code for serverless applications. 
+
