@@ -1,0 +1,23 @@
+AWS Lambda itself doesn't directly use or require decorators to identify a function as a Lambda handler. 
+Instead, you tell AWS Lambda which function to execute as the entry point by specifying the handler name during the function's configuration
+
+
+In AWS Lambda, the function signature (the input parameters and return type) is primarily driven by two things:
+The Event Source: The service that triggers the Lambda function determines the structure of the event object. This is often a JSON payload. For example, an S3 event will have a different structure than an API Gateway event.
+The Runtime: Each language runtime has its own conventions for how the function handler should be defined. 
+
+
+Here's how it works across different contexts:
+1. When deploying or configuring a Lambda function
+Console: When creating or editing a Lambda function in the AWS console, you'll find a field under "Runtime settings" (or similar, depending on the runtime) where you explicitly enter the handler name.
+AWS CLI: When using the AWS Command Line Interface (CLI) to deploy or update a function, you use the --handler parameter to specify the handler.
+AWS SDKs: If you're using an AWS SDK (Python's Boto3, Node.js SDK, Java SDK, etc.), the method for creating or updating a function will have a parameter where you provide the handler name.
+Infrastructure as Code (IaC) Tools: Tools like AWS CloudFormation, AWS Serverless Application Model (SAM), and AWS CDK also have specific properties or fields for defining the handler name within your template or code. 
+
+
+2. The handler name format
+The handler name typically follows a convention based on the runtime:
+Python: file_name.function_name (e.g., lambda_function.lambda_handler). This tells Lambda to import the lambda_function.py file and execute the function named lambda_handler.
+Node.js: file_name.function_name (e.g., index.handler). Lambda looks for the handler function in the index.js file.
+Java: package.ClassName::methodName (e.g., com.example.Handler::handleRequest).
+Go: The name of the executable file within your deployment package.  
