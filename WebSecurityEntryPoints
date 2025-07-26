@@ -6,9 +6,17 @@ Web applications receive data through HTTP requests, which are sent by users or 
 2. API Endpoints:
 APIs (Application Programming Interfaces) expose specific functionalities to other applications. Each API endpoint acts as an entry point, allowing external applications to interact with the application's backend. 
 1) Typical API handlers from web framework
-3) GraphQL resolvers/handlers
-2) Serverless function as API handler: behind gateway like AWS lambda function / GCP cloud function
+2) GraphQL resolvers/handlers
+3) Serverless function as API handler: behind gateway like 
+AWS lambda function:
+https://docs.aws.amazon.com/lambda/latest/dg/lambda-samples.html
+https://docs.aws.amazon.com/lambda/latest/dg/python-handler.html#:~:text=LambdaDeveloper%20Guide-,Example%20Python%20Lambda%20function%20codeHandler%20naming%20conventionsUsing%20the,Service%20(Amazon%20S3)%20bucket.
 
+GCP cloud function 
+https://cloud.google.com/run/docs/write-http-functions#node.js
+
+Azure Functions 
+https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cfunctionsv2&pivots=programming-language-csharp
 
 3. File Uploads:
 When users upload files to a web application, the application must process and store these files. File upload functionalities are often vulnerable to attacks such as code injection or malware distribution. 
