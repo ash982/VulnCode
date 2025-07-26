@@ -5,7 +5,7 @@ Web applications receive data through HTTP requests, which are sent by users or 
 
 2. API Endpoints:
 APIs (Application Programming Interfaces) expose specific functionalities to other applications. Each API endpoint acts as an entry point, allowing external applications to interact with the application's backend. 
-1) Typical API handlers from web framework
+1) RESTful API handlers （annotations)
 2) GraphQL resolvers/handlers
 3) Serverless function as API handler: behind gateway like 
 AWS lambda function:
