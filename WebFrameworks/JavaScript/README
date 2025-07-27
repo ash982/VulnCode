@@ -16,5 +16,13 @@ Server-side frameworks:
   Koa.js: Expressive middleware for Node.js using async functions
   Hapi.js: A powerful framework for building scalable applications and services
 
+GRANDstack(Graphs All the Way Down):
+GRANDstack is a full-stack framework for building applications with GraphQL, React, Apollo and the Neo4j Database.
+GraphQL is our API layer, and React is a JavaScript UI library for creating user interfaces on web, mobile and now in VR. Apollo is a suite of tools that makes it easier to use GraphQL both on the client and the server. 
+Lastly, the Neo4j database is a opens in new tabnative graph database.
+The Neo4j GraphQL Library provides a seamless way to integrate GraphQL APIs with a Neo4j graph database. 
+It simplifies the development of API backends by automatically translating GraphQL queries into Cypher, Neo4j's native query language.
+
+
 These frameworks demonstrate JavaScript's strength in creating robust, efficient applications across the full stack. 
 Each offers unique features and advantages, allowing developers to choose the best tool for their specific project requirements.
