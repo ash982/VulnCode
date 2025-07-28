@@ -1,0 +1,6 @@
+Two popular choices for handling big data workloads are AlloyDB and BigQuery. 
+AlloyDB: a distributed SQL database built on a shared-nothing architecture.
+BigQuery: a fully-managed serverless data warehouse provided by Google Cloud.
+
+AlloyDB for PostgreSQL (fully managed): This is the core, enterprise-grade database service, available only on Google Cloud. 
+AlloyDB for PostgreSQL (fully managed): A downloadable, self-managed version of AlloyDB that provides PostgreSQL compatibility and performance enhancements. It's designed for flexibility and can be deployed in diverse environments
