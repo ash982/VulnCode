@@ -16,3 +16,7 @@ https://cloud.google.com/run/docs/write-event-driven-functions
 .PHP: Can define a handler function to respond to HTTP requests, <<Link: says Alibaba Cloud https://www.alibabacloud.com/help/en/functioncompute/fc-2-0/user-guide/configure-an-http-trigger-that-invokes-a-function-with-http-requests>>. 
 
 The specific methods for defining HTTP-triggered functions in these languages are detailed in the Google Cloud documentation for <<Link: writing Cloud Run functions https://cloud.google.com/run/docs/write-functions>>
+
+
+Note: 
+@functions_framework.cloud_event is for event
