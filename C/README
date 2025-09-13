@@ -32,7 +32,7 @@ This is the most dangerous C++ anti-pattern. memcpy knows nothing about construc
 
 3. Causing Buffer Overflows
 This is a classic and severe security vulnerability. It happens when you copy more bytes than the destination buffer can hold.
-❌ Bad Example: Unchecked size from an external source - bad3.c
+❌ Bad Example: Unchecked size from an external source - bad3-BufferOverflows.c
 ✅ The Correct Way: Always validate the size before copying.
 For a safer alternative, consider memcpy_s if your platform supports it (part of C11 Annex K).
 
@@ -45,6 +45,21 @@ C++ objects	        ❌ Bad (Use copy constructor/assignment)	memcpy causes shal
 Unchecked sizes	    ❌ Bad (Validate size first)	Leads to buffer overflows, a major security risk.
 Serialization       ✅ Good (with caution)	Useful for raw data, but not portable due to endianness, padding, and pointer sizes.
 
+==============================================================================================================
+Buffer Overflows
+
+The fundamental vulnerability it presents is the buffer overflow, and proper size checking is the direct countermeasure.
+The number of bytes to copy (count) must never exceed the size of the destination buffer.
+
+Secure Patterns for Size Checking
+Pattern 1: The min Approach (Truncation is Acceptable)
+This is the most common and robust solution. You determine the safe amount to copy by choosing the smaller of the two sizes: the source length or the destination capacity. This effectively truncates the input if it's too large.
+✅ C Implementation (using ternary operator): fix1-BufferOverflows.c
+✅ C Implementation (using ternary operator): fix2-BufferOverflows.cpp
+
+Pattern 2: The Guard Condition (Truncation is an Error)
+Sometimes, truncating data is not acceptable, and you should treat an oversized input as an error. In this pattern, you check the size first and refuse to perform the copy if the input is too large.
+✅ C/C++ Implementation: fix3-BufferOverflows.c
 
 
 
