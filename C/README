@@ -1,0 +1,3 @@
+memcpy:
+a fundamental function in C and C++, known for its raw speed. However, its power comes with significant risks. Understanding the good and bad patterns is crucial for writing safe and correct code.
+  
