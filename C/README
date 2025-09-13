@@ -43,7 +43,7 @@ Copying arrays	    ✅ Good	Efficient for bulk copying of primitive data.
 Overlapping memory	❌ Bad (Use memmove)	memcpy has undefined behavior for overlapping regions. memmove is guaranteed to work.
 C++ objects	        ❌ Bad (Use copy constructor/assignment)	memcpy causes shallow copies, skips constructors/destructors, leading to leaks and crashes.
 Unchecked sizes	    ❌ Bad (Validate size first)	Leads to buffer overflows, a major security risk.
-Serialization	      ✅ Good (with caution)	Useful for raw data, but not portable due to endianness, padding, and pointer sizes.
+Serialization       ✅ Good (with caution)	Useful for raw data, but not portable due to endianness, padding, and pointer sizes.
 
 
 
