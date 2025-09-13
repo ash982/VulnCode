@@ -22,22 +22,22 @@ The core principle of a bad memcpy is copying memory that has complex structure,
 
 1. The #1 Anti-Pattern: Overlapping Memory Regions
 The behavior of memcpy is undefined if the source and destination memory regions overlap. It might work, it might corrupt your data, or it might crash.
-❌ Bad Example: Shifting data in an array
+❌ Bad Example: Shifting data in an array - bad1.c
 Rule of Thumb: If there's any chance the source and destination might overlap, use memmove.
 
 2. Copying Non-Trivial C++ Objects
 This is the most dangerous C++ anti-pattern. memcpy knows nothing about constructors, destructors, or copy-assignment operators. It performs a "shallow copy," which can lead to memory leaks, double-frees, and corrupted state.
-❌ Bad Example: Copying an object containing a std::string or std::vector
+❌ Bad Example: Copying an object containing a std::string or std::vector - bad2.c
 ✅ The Correct Way: Use the C++ copy constructor or copy assignment operator.
 
 3. Causing Buffer Overflows
 This is a classic and severe security vulnerability. It happens when you copy more bytes than the destination buffer can hold.
-❌ Bad Example: Unchecked size from an external source
+❌ Bad Example: Unchecked size from an external source - bad3.c
 ✅ The Correct Way: Always validate the size before copying.
 For a safer alternative, consider memcpy_s if your platform supports it (part of C11 Annex K).
 
 Summary Table
-Pattern	            Good (memcpy) or Bad (memmove/other)?	     Why?
+Pattern	            Good (memcpy) or Bad (memmove/other)? Why?
 Copying POD structs	✅ Good	Structs are simple blocks of memory. This is the ideal use case.
 Copying arrays	    ✅ Good	Efficient for bulk copying of primitive data.
 Overlapping memory	❌ Bad (Use memmove)	memcpy has undefined behavior for overlapping regions. memmove is guaranteed to work.
