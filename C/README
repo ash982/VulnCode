@@ -61,6 +61,13 @@ Pattern 2: The Guard Condition (Truncation is an Error)
 Sometimes, truncating data is not acceptable, and you should treat an oversized input as an error. In this pattern, you check the size first and refuse to perform the copy if the input is too large.
 ✅ C/C++ Implementation: fix3-BufferOverflows.c
 
+----------------------
+Critical Pitfall: sizeof on Pointers
+A very common mistake is using sizeof on a pointer instead of an array. When you pass an array to a function, it "decays" into a pointer, and sizeof will give you the size of the pointer itself (usually 4 or 8 bytes), not the size of the original buffer.
+
+Pass Sizes Explicitly: When passing a buffer to a function, always pass its size as a separate size_t argument. Do not rely on sizeof for pointers.
+Wrong: sizeof-wrong.c
+Correct: sizeof-safe.c
 
 
 
