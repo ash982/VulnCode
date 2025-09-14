@@ -66,8 +66,9 @@ Critical Pitfall: sizeof on Pointers
 A very common mistake is using sizeof on a pointer instead of an array. When you pass an array to a function, it "decays" into a pointer, and sizeof will give you the size of the pointer itself (usually 4 or 8 bytes), not the size of the original buffer.
 
 Pass Sizes Explicitly: When passing a buffer to a function, always pass its size as a separate size_t argument. Do not rely on sizeof for pointers.
-Wrong: sizeof-wrong.c
-Correct: sizeof-safe.c
+
+Wrong way to the size of the buffer - sizeof on a pointer: sizeof-wrong.c
+Correct way to the size of the buffer - sizeof on an array: sizeof-safe.c (And it is the caller's reponsibility to pass the correct size of buffer to the function.)
 
 
 
