@@ -67,6 +67,7 @@ A very common mistake is using sizeof on a pointer instead of an array. When you
 
 Pass Sizes Explicitly: When passing a buffer to a function, always pass its size as a separate size_t argument. Do not rely on sizeof for pointers.
 
+Cross functions:
 Wrong way to the size of the buffer - sizeof on a pointer: sizeof-wrong.c
 Correct way to the size of the buffer - sizeof on an array: sizeof-safe.c (And it is the caller's reponsibility to pass the correct size of buffer to the function.)
 
