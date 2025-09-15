@@ -69,7 +69,7 @@ Pass Sizes Explicitly: When passing a buffer to a function, always pass its size
 
 Cross functions:
 Wrong way to the size of the buffer - sizeof on a pointer: sizeof-wrong.c
-Correct way to the size of the buffer - sizeof on an array: sizeof-safe.c (And it is the caller's reponsibility to pass the correct size of buffer to the function.)
+Correct way to the size of the buffer - sizeof on an array: sizeof-safe.c (And it is the caller's(buffer owner) reponsibility to pass the correct size of buffer to the function.)
 
 
 
