@@ -60,9 +60,50 @@ This is the most common and robust solution. You determine the safe amount to co
 Pattern 2: The Guard Condition (Truncation is an Error)
 Sometimes, truncating data is not acceptable, and you should treat an oversized input as an error. In this pattern, you check the size first and refuse to perform the copy if the input is too large.
 ✅ C/C++ Implementation: fix3-BufferOverflows.c
+----------------------
+A Better, More Robust Solution
+To fully prevent buffer overflows with memcpy, you must check both the destination and the source sizes. The number of bytes to copy should be the minimum of these two values.
+#include <string.h>
+#include <stdio.h>
+
+int main() {
+    char source[] = "Hello, world!";
+    char dest[10];
+
+    // Get the size of the data in the source buffer (e.g., using strlen + 1 for null terminator)
+    size_t source_size = strlen(source) + 1;
+
+    // Determine the number of bytes to copy, which is the smaller of the two buffer sizes.
+    // This prevents both read and write overflows.
+    size_t bytes_to_copy = (source_size < sizeof(dest)) ? source_size : sizeof(dest);
+
+    // Call memcpy with the safe, determined number of bytes.
+    // Explicitly check if there is data to copy before calling memcpy.
+    if (bytes_to_copy > 0) {
+        memcpy(dest, source, bytes_to_copy);
+    }
+
+    printf("Copied string: %s\n", dest);
+
+    return 0;
+}
 
 ----------------------
-Critical Pitfall: sizeof on Pointers
+The Safest Way: memcpy_s
+The C11 standard introduced a safer alternative to memcpy called memcpy_s. This function is part of a set of "safer" functions designed to prevent common buffer overflow vulnerabilities.
+
+The function signature for memcpy_s is:
+errno_t memcpy_s(void *restrict dest, rsize_t destsz, const void *restrict src, rsize_t n);
+
+dest: The destination buffer.
+destsz: The size of the destination buffer. This is the key difference.
+src: The source buffer.
+n: The number of bytes to copy from src.
+
+memcpy_s will automatically check if n is greater than destsz. If it is, it will return an error code and not perform the copy, thereby preventing the buffer overflow. This is the recommended approach for new code on systems that support C11 and memcpy_s.
+----------------------
+Critical Pitfall: 
+1) sizeof on Pointers (should on Buffers)
 A very common mistake is using sizeof on a pointer instead of an array. When you pass an array to a function, it "decays" into a pointer, and sizeof will give you the size of the pointer itself (usually 4 or 8 bytes), not the size of the original buffer.
 
 Pass Sizes Explicitly: When passing a buffer to a function, always pass its size as a separate size_t argument. Do not rely on sizeof for pointers.
@@ -70,6 +111,39 @@ Pass Sizes Explicitly: When passing a buffer to a function, always pass its size
 Cross functions:
 Wrong way to the size of the buffer - sizeof on a pointer: sizeof-wrong.c
 Correct way to the size of the buffer - sizeof on an array: sizeof-safe.c (And it is the caller's(buffer owner) reponsibility to pass the correct size of buffer to the function.)
+
+
+2) The Off-by-One Error
+The condition sizeof(dest) > bytes is slightly flawed. If you want to copy the entire destination buffer, the number of bytes to copy (bytes) should be equal to sizeof(dest). With your check, this would fail because sizeof(dest) > sizeof(dest) is false. A more correct check for preventing overflow on the destination side is:
+bytes <= sizeof(dest)
+
+3) Not Checking the Source Size
+The most critical missing piece is the size of the source buffer. The memcpy function will attempt to read bytes number of bytes from the source pointer, regardless of how much memory is actually allocated there.
+
+for example, memcpy try to read 50 bytes from the source buffer, which is only 10 bytes long. This is a read buffer overflow (or out-of-bounds read) and will lead to undefined behavior, a crash, or a security vulnerability.
+
+4) Not Checking the copy bytes > 0
+Scenario 1: With the Check (if (bytes > 0))
+****************************
+int bytes = -2;
+
+if (bytes > 0) {
+    // This code block is not executed because -2 is not greater than 0.
+    memcpy(dest, source, bytes);
+}
+****************************
+In this case, the negative bytes value is correctly identified as an invalid input. The memcpy function is never called, and your program avoids the massive, out-of-bounds copy that would lead to a crash.
+
+Scenario 2: Without the Check
+****************************
+int bytes = -2;
+
+// The check is missing!
+memcpy(dest, source, bytes);
+****************************
+Here, the memcpy function is called directly with bytes as an int. As we've discussed, C's type conversion rules kick in, and the -2 is automatically converted to an extremely large unsigned number (e.g., 18,446,744,073,709,551,614 on a 64-bit system). This leads to a buffer overflow and a likely program crash.
+
+
 
 
 
