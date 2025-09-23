@@ -70,3 +70,59 @@ print <<HTML;
 </body>
 </html>
 HTML
+----------------------------
+private variable:
+In Perl, "my" is a keyword used to declare lexically scoped variables. Here's what it means:
+
+Basic Definition:
+my creates a private variable that only exists within the current scope (block, subroutine, or file).
+
+Why Use my?
+Prevents variable pollution - variables don't accidentally interfere with each other
+Memory management - variables are automatically cleaned up when out of scope
+Best practice - makes code more maintainable and predictable
+
+Each of these variables only exists within the current subroutine and won't conflict with variables of the same name elsewhere in the code.
+
+You can declare a variable with my and assign a value to it later. Here are the different ways to do this:
+
+Method 1: Declare then assign (what you asked about)
+my $q;           # Declare $q (it's undefined at this point)
+$q = "hello";    # Assign value later
+
+Method 2: Declare and assign in one line
+my $q = "hello"; # Declare and assign together
+
+Method 3: Declare multiple, assign individually
+my ($x, $y, $z);  # Declare multiple variables
+$x = "hello";
+$y = "world";
+$z = 123;
+------------------------------
+global scope variable:
+variables without my could be accessed across the entire application: Without my, Perl variables have global scope and can cross functions and even files.  
+
+Best Practice:
+Always use my unless you specifically need global access. It prevents:
+
+Accidental variable conflicts
+Hard-to-debug issues
+Memory leaks
+Security vulnerabilities
+Global variables make code harder to maintain and can create unexpected side effects across your application.
+
+Why This Can Be Dangerous:
+$count = 0;  # Global
+
+sub increment {
+    $count++;  # Modifies global
+}
+
+sub reset {
+    $count = 0;  # Also modifies global
+}
+
+sub some_other_function {
+    $count = "oops";  # Accidentally breaks everything!
+}
+
