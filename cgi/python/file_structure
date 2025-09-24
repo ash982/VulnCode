@@ -1,0 +1,65 @@
+Here's the typical file structure for CGI programs and web server setup:
+
+Basic Web Server Directory Structure
+/var/www/
+├── html/                           # Document root (static files)
+│   ├── index.html
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   └── script.js
+│   └── images/
+│       └── logo.png
+├── cgi-bin/                        # CGI scripts directory
+│   ├── hello.py                    # Our first CGI script
+│   ├── form_handler.py             # Our form handling script
+│   ├── data_api.py                 # API endpoint script
+│   └── utils/                      # CGI utility modules
+│       ├── __init__.py
+│       ├── database.py
+│       └── helpers.py
+└── logs/                           # Web server logs
+    ├── access.log
+    └── error.log
+
+Complete Example File Structure
+/var/www/
+├── html/
+│   ├── index.html                  # Main website page
+│   ├── contact.html                # Contact form page
+│   └── css/
+│       └── main.css
+├── cgi-bin/
+│   ├── contact.py                  # Contact form handler
+│   ├── api/
+│   │   ├── users.py                # User API endpoints
+│   │   ├── products.py             # Product API endpoints
+│   │   └── auth.py                 # Authentication handler
+│   ├── admin/
+│   │   ├── dashboard.py            # Admin dashboard
+│   │   └── reports.py              # Admin reports
+│   └── lib/                        # Shared libraries
+│       ├── __init__.py
+│       ├── config.py               # Configuration
+│       ├── database.py             # Database operations
+│       └── session.py              # Session management
+└── data/                           # Data storage
+    ├── uploads/                    # File uploads
+    ├── cache/                      # Cache files
+    └── sessions/                   # Session files
+
+
+Apache Configuration Structure
+/etc/apache2/
+├── apache2.conf                    # Main configuration
+├── sites-available/
+│   ├── 000-default.conf           # Default site
+│   └── mysite.conf                 # Custom site config
+├── sites-enabled/
+│   └── 000-default.conf           # Symlink to enabled site
+├── mods-available/
+│   └── cgi.load                    # CGI module
+├── mods-enabled/
+│   └── cgi.load                    # Symlink to enabled module
+└── conf-available/
+    └── cgi.conf                    # CGI-specific configuration
