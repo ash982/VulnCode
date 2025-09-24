@@ -1,4 +1,4 @@
-a typical file structure for a web server with CGI support (use bash):
+A typical file structure for a web server with CGI support (use bash):
 
 Basic Web Server Structure
 /var/www/
