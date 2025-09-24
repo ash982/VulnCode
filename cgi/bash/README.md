@@ -68,3 +68,23 @@ Complete Example Structure
     ├── access.log
     ├── error.log
     └── cgi.log
+
+
+Setting Up Permissions
+# Make CGI scripts executable
+chmod +x /var/www/cgi-bin/*.cgi
+
+# Set proper ownership
+chown -R www-data:www-data /var/www/
+
+# Create data directory with write permissions
+mkdir -p /var/www/data
+chmod 755 /var/www/data
+
+# Make data files writable by web server
+touch /var/www/data/guestbook.txt
+chmod 666 /var/www/data/guestbook.txt
+
+This structure separates static content (html/) from executable scripts (cgi-bin/) and keeps sensitive data (data/) outside the web-accessible directories for security.
+
+
