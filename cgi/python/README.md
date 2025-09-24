@@ -1,4 +1,4 @@
-keywords:
+# CGI keywords:
 
 import cgi
 import cgitb
