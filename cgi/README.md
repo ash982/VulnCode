@@ -9,14 +9,16 @@ The .cgi file extension is a simple indicator that the file is an executable pro
 CGI programs can be written in virtually any programming language that can read from standard input, write to standard output, and access environment variables, 
 though Perl and C/C++ are historically popular choices. Other common languages for CGI include Python, PHP, Ruby, and various shell scripts like Bash. 
 
-How CGI Works
+**How CGI Works**
 CGI isn't a language but a standard interface that allows web servers to execute external programs (scripts) to generate dynamic content. 
 The web server passes information to the CGI program via environment variables and standard input, and the program sends its response back to 
 the web server on standard output. 
+
 =========================================================================================
-CGI vs Web App
+**CGI vs Web App**
 a CGI (Common Gateway Interface) program is not simply another name for a web app. CGI is a specific, older technology for running external programs on 
 a web server to create dynamic content. In contrast, a web app is a broader, modern concept that refers to a full application accessed via a web browser. 
+
 ----------------------------
 What is a CGI program?
 The technology: CGI is a standard that allows a web server to communicate with an external executable program (called a CGI script or program).
@@ -26,6 +28,7 @@ The server passes user data to the script through standard input and environment
 and passes it back to the server, which sends it to the user.
 
 Limitations: A new process is created for every single request, which can be slow and resource-intensive, making it a poor choice for high-traffic sites. 
+
 ----------------------------
 What is a web app?
 The technology: A web application is an application that runs on a server and is accessed by users through a web browser. 
@@ -41,7 +44,7 @@ Backend (server-side): The application logic that processes requests, interacts 
 Database: Stores data needed for the application. 
 
 ----------------------------
-Summary of differences
+**Summary of differences**
 Aspect 	           CGI Program	                                                       
 Concept	           A specific technology and protocol for executing server-side programs.	       
 Architecture	   Spawns a new process for every request, which is inefficient for high traffic.	
@@ -58,7 +61,7 @@ Timeline	       A foundational, older technology from the early days of the web 
 
 
 =========================================================================================
-To use a Perl script as a CGI (Common Gateway Interface) program, follow these steps:
+**To use a Perl script as a CGI (Common Gateway Interface) program, follow these steps:**
 1. Shebang Line: Begin the Perl script with a shebang line that specifies the path to the Perl interpreter on your server. For example:
     #!/usr/bin/perl
 
@@ -148,6 +151,7 @@ my ($x, $y, $z);  # Declare multiple variables
 $x = "hello";
 $y = "world";
 $z = 123;
+
 ------------------------------
 global scope variable:
 variables without my could be accessed across the entire application: Without my, Perl variables have global scope and can cross functions and even files.  
