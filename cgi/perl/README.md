@@ -60,7 +60,9 @@ print <<HTML;
 </body>
 </html>
 HTML
+
 ----------------------------
+
 private variable:
 In Perl, "my" is a keyword used to declare lexically scoped variables. Here's what it means:
 
@@ -88,6 +90,7 @@ my ($x, $y, $z);  # Declare multiple variables
 $x = "hello";
 $y = "world";
 $z = 123;
+
 ------------------------------
 global scope variable:
 variables without my could be accessed across the entire application: Without my, Perl variables have global scope and can cross functions and even files.  
