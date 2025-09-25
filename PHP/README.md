@@ -1,6 +1,10 @@
-# addslashes
+# stripslashes
+stripslashes() only removes backslashes but doesn't sanitize HTML/JavaScript content, insufficient Input Sanitization.
 
-Here are the main techniques that demonstrate why addslashes() is insufficient protection:
+=======================================
+
+# addslashes
+Here are the main techniques that demonstrate why addslashes() used in SQL query is insufficient protection:
 
 **addslashes() only escapes these characters:**
 
