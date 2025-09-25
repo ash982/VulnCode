@@ -1,3 +1,11 @@
+# .cgi file 
+
+The .cgi file extension is not a specific language, but a historical convention that tells a web server to execute a file using the Common Gateway Interface (CGI). 
+While CGI scripts were most commonly written in Perl during the early days of the web, they can be written in virtually any programming language. 
+The web server relies on the "shebang" line at the top of the script (#!/usr/bin/perl for Perl, #!/usr/bin/python for Python) to know which interpreter to use. 
+The .cgi file extension is a simple indicator that the file is an executable program, not a static file like an HTML document.
+
+=========================================================================================
 CGI programs can be written in virtually any programming language that can read from standard input, write to standard output, and access environment variables, 
 though Perl and C/C++ are historically popular choices. Other common languages for CGI include Python, PHP, Ruby, and various shell scripts like Bash. 
 
