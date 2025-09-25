@@ -1,8 +1,8 @@
-**addslashes**
+# addslashes
 
 Here are the main techniques that demonstrate why addslashes() is insufficient protection:
 
-addslashes() only escapes these characters:
+**addslashes() only escapes these characters:**
 
 Single quote (') → '
 Double quote (") → "
@@ -10,8 +10,8 @@ Backslash () → \
 NULL byte → \0
 
 ----------------------------------------------------
-**Common Bypass Techniques**
-1. Character Set Vulnerabilities
+# Common Bypass Techniques
+**1. Character Set Vulnerabilities**
 When using multi-byte character sets (like GBK, Big5):
 
 // Vulnerable code
@@ -19,13 +19,12 @@ $input = addslashes($_GET['input']);
 $query = "SELECT * FROM users WHERE name = '$input'";
 
 Bypass:
-
 Input: %bf%27 OR 1=1 --
 After addslashes: %bf%5c%27 OR 1=1 --
 In GBK charset: %bf%5c becomes 縗 (single character)
 Result: SELECT * FROM users WHERE name = '縗' OR 1=1 --'
 
-2. Second-Order SQL Injection
+**2. Second-Order SQL Injection**
 When escaped data is stored and later used without re-escaping:
 
 // First request - data gets stored with escaping
@@ -35,7 +34,7 @@ $name = addslashes("O\'Malley"); // Becomes O\'Malley in DB
 $stored_name = get_from_db(); // O'Malley (unescaped)
 $query = "SELECT * FROM logs WHERE user = '$stored_name'"; // Vulnerable!
 
-3. Numeric Context Injection
+**3. Numeric Context Injection**
 When injecting into numeric fields without quotes:
 
 $id = addslashes($_GET['id']); // addslashes has no effect on numbers
@@ -46,7 +45,7 @@ Bypass:
 Input: 1 OR 1=1
 Query becomes: SELECT * FROM users WHERE id = 1 OR 1=1
 
-4. LIKE Clause Bypasses
+**4. LIKE Clause Bypasses**
 Using wildcards that aren't escaped by addslashes():
 
 $search = addslashes($_GET['search']);
@@ -57,7 +56,7 @@ Bypass:
 Input: %' UNION SELECT password FROM users WHERE '1'='1
 Works because % and _ are not escaped by addslashes()
 
-5. Encoding Bypasses
+**5. Encoding Bypasses**
 Using different encodings to bypass filtering:
 
 URL encoding
@@ -86,7 +85,7 @@ Resulting query:
 INSERT INTO tdb (...) VALUES (..., 'high', (SELECT password FROM admin_users LIMIT 1), 'fake', ...)
 
 ----------------------------------------------------
-**Proper Prevention**
+# Proper Prevention
 Instead of trying to fix addslashes(), use these secure methods:
 
 1. Prepared Statements (Recommended)
