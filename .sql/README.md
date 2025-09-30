@@ -98,16 +98,8 @@ by using **Dynamic SQL inside the stored procedure**.
 
 In this scenario:
 The stored procedure accepts a standard **parameter** (e.g., `@TableName VARCHAR(100)`).
-The stored procedure builds a full SQL query as a string by concatenating the parameter value with the rest of the SQL:
+The stored procedure builds a full SQL query as a string by concatenating the parameter value with the rest of the SQL: `storedprecedure.sql`
 
--- Example using T-SQL (SQL Server)
-CREATE PROCEDURE GetTableData (@TableName VARCHAR(100))
-AS
-BEGIN
-    DECLARE @SQLQuery NVARCHAR(MAX);
-    SET @SQLQuery = N'SELECT * FROM ' + **QUOTENAME**(@TableName);
-    EXEC sp_executesql @SQLQuery; -- Executes the constructed SQL string
-END
 
 Crucially, in the code above, the placeholder logic is handled by the procedural code logic (SET @SQLQuery = ...), not by the database engine's syntax for 
 stored procedures itself.
