@@ -101,7 +101,7 @@ The stored procedure accepts a standard **parameter** (e.g., `@TableName VARCHAR
 The stored procedure builds a full SQL query as a string by concatenating the parameter value with the rest of the SQL: `storedprecedure.sql`
 
 
-Crucially, in the code above, the placeholder logic is handled by the procedural code logic (SET @SQLQuery = ...), not by the database engine's syntax for 
+Crucially, in the code above, the placeholder logic is handled by the procedural code logic (`SET @SQLQuery =` ...), not by the database engine's syntax for 
 stored procedures itself.
 
 **Security Note: Dynamic SQL is a known security risk for SQL Injection if the input is not rigorously validated or used with safe functions like QUOTENAME() 
