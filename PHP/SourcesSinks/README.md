@@ -58,8 +58,8 @@ These values are set by the client and must always be treated as untrusted input
 | `$_SERVER['QUERY_STRING']` | The query string from the URL. This is the source for `$_GET` variables. | 
 | `$_SERVER['REQUEST_URI']` | The URI used to access the page. Contains the user-supplied path and query string and can be tainted. | 
 | `$_SERVER['REMOTE_HOST']` | The hostname of the client. This relies on reverse DNS lookups and may be spoofed. | 
-| `$_SERVER['AUTH_TYPE']`, `$_SERVER['PHP_AUTH_USER']`, `$_SERVER['PHP_AUTH_PW']` | Variables related to HTTP authentication. | 
-| `$_SERVER['argv']`, `$_SERVER['argc']` | Relevant for command-line scripts, but can be controlled by user arguments in that context.  |   
+| `$_SERVER['AUTH_TYPE']`, `$_SERVER['PHP_AUTH_USER']`, `$_SERVER['PHP_AUTH_PW']` | Variables related to HTTP authentication. The web server processes the `Authorization` header | 
+| `$_SERVER['argv']`, `$_SERVER['argc']` | Relevant for command-line scripts, but can be controlled by user arguments in that context (not from http clinet) |   
 
 **`$_SERVER['HTTP_*']`: Any value beginning with HTTP_ is directly from an HTTP header and should be considered user-controlled.**    
 
@@ -199,9 +199,24 @@ $stmt->execute([':user' => $_POST['username']]);
 **B. Preventing Command Injection**  
 
 1. Avoid Calling Shell Commands: The most secure approach is to use native PHP functions instead of calling external programs.  
+
+Example1:
 Instead of: `system('rm ' . $file);`  
 Use: `unlink($file);`  
 
+Example2: In PHP, any string enclosed in **backticks** is treated as a shell command and is executed immediately by the operating system. This is a built-in feature of the language.  
+Execution: The PHP interpreter takes the entire string inside the backticks (ls -l $filename), passes it to the underlying shell (like Bash or Zsh), and waits for it to finish.  
+Assignment: The output (stdout) of that shell command (the file listing, in this case) is then captured and assigned to the variable $file_listing.  
+```php
+    // 1. Source: Get unsanitized user input (e.g., from a URL parameter like ?file=...)
+    $filename = $_GET['file'];
+
+    // 2. Sink: Execute the shell command using the backtick operator
+    // An attacker can set ?file=; cat /etc/passwd
+    // The resulting command will be: ls -l ; cat /etc/passwd
+    // ruleid: panw.php.backend.command-injection
+    $file_listing = `ls -l $filename`;
+```
 2. If you MUST use a shell command: Use built-in PHP functions to properly escape arguments for the shell.  
     `escapeshellcmd()`: Escapes the entire command string (use this if the user controls the command).  
     `escapeshellarg()`: Escapes a single argument to a command (use this if the user controls a parameter to a fixed command).  
@@ -211,6 +226,8 @@ $file = escapeshellarg($_GET['filename']);
 // The command itself is fixed, only the argument is user-controlled
 system('ls -l ' . $file); 
 ```
+
+
 
 **C. Preventing PHP Code Execution (e.g., eval(), include())**  
 1. Do Not Use Dangerous Sinks: Functions like eval(), assert(), and create_function() should almost always be avoided in production code as they are the primary enablers of PHP Code Injection.  
