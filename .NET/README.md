@@ -420,9 +420,9 @@ public IActionResult GetDevices([FromQuery] RequestParameters parameters)
 |IntelliSense | Generic | Generic | Strongly typed
 
 **Recommendation:**  
-Use ActionResult<T> for API controllers with consistent return types
-Use IActionResult for MVC controllers or when you need maximum flexibility
-ActionResult (non-generic) is rarely used directly - stick with the interface or generic version
+Use ActionResult<T> for API controllers with consistent return types  
+Use IActionResult for MVC controllers or when you need maximum flexibility  
+ActionResult (non-generic) is rarely used directly - stick with the interface or generic version  
 
 **Real-World Usage Patterns**  
 **1. API Controllers (Recommended: ActionResult<T>)**  
