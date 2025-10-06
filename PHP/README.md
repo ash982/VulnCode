@@ -126,7 +126,7 @@ escapeshellarg() vs. escapeshellcmd() at a glance
 | Purpose | Escapes a single argument to a command.	| Escapes metacharacters in the entire command string.
 | Security | Safe for user-supplied arguments because it wraps them in quotes. | Can be unsafe for user-supplied arguments and can be bypassed for injection.
 | Recommended use | For every individual argument from user input.	| Only for the command name if it must come from user input (very rare and risky).
-| Output | Wraps the string in single quotes and escapes existing single quotes.| Prefixes special characters (#, &, ;, etc.) with a backslash.
+| Output | Wraps the string in `single quotes` and escapes existing single quotes.| Prefixes special characters (`#, &, ;, etc.`) with a `backslash`.
 
 **Best practices for executing shell commands**
 1. Use escapeshellarg() for each argument derived from user input.
