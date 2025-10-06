@@ -22,8 +22,8 @@ Message queuing
 Any JSON serialization scenario  
 
 
-**2. Check Usage Context - Educated Guesses**
-Look for where RequestParameters is used:
+**2. Check Usage Context - Educated Guesses**  
+Look for where RequestParameters is used:  
 ```grep -r "RequestParameters" --include="*.cs" .```
 
 
@@ -35,8 +35,8 @@ To definitively determine if it's HTTP request parameters, you'd need to look fo
 var response = await httpClient.PostAsJsonAsync("/api/endpoint", requestParameters);
 ```
 
-**4. Check Controller Method Signatures**
-Look for controller methods that use this class:
+**4. Check Controller Method Signatures**  
+Look for controller methods that use this class:  
 ```c#
 [HttpAttribute]/[HttpVerbAttribute]
 [OtherAttributes]
@@ -45,7 +45,8 @@ public ReturnType MethodName(ParameterType parameterName, ...)
     // Method body
 }
 ```
-**HTTP Verb Attributes**  
+**HTTP Verb Attributes**
+```c#
 [HttpGet]        // Handles GET requests  
 [HttpPost]       // Handles POST requests  
 [HttpPut]        // Handles PUT requests  
@@ -53,16 +54,18 @@ public ReturnType MethodName(ParameterType parameterName, ...)
 [HttpPatch]      // Handles PATCH requests  
 [HttpHead]       // Handles HEAD requests  
 [HttpOptions]    // Handles OPTIONS requests  
-
+```
 **Return Types**  
+```c#
 public IActionResult Get()                    // Generic action result  
 public ActionResult<Product> Get()            // Strongly typed result  
 public Product Get()                          // Direct type (auto-wrapped)  
 public Task<IActionResult> GetAsync()         // Async generic  
 public Task<ActionResult<Product>> GetAsync() // Async strongly typed  
 public void Post()                            // No return value  
-
+```
 **Parameters with Binding Sources**  
+```c#
 // Explicit Parameter Binding Attributes: Look for these attributes on properties or parameters:
 public IActionResult Search([FromUri] RequestParameters filters) // Web API
 
@@ -73,7 +76,7 @@ public IActionResult Get(
     [FromHeader] string auth,        // From HTTP headers parameters  
     [FromRoute] string id,           // Route parameter, is usually based on the URL    
     [FromForm] IFormFile file)       // From form data parameter  
-
+```
 
 **Real-World Examples**    
 ```c#
@@ -257,8 +260,8 @@ public IActionResult GetProducts(ProductFilter filter) // No [FromQuery] attribu
 | Example | [FromQuery] string search | ?name=John → Person.Name = "John"
 | Customization | Limited to source selection | Custom binders, converters, validators
 
-**Complex Model Binding Examples**
-**1. Nested Object Binding**
+**Complex Model Binding Examples**  
+**1. Nested Object Binding**  
 ```c#
 public class CreateOrderRequest
 {
@@ -298,7 +301,7 @@ Query String Example:
 
 ## .NET Framework 
 **ASP.NET Web API** 
-1. From the .csproj file references: xx.Web.csproj
+**1. From the .csproj file references: xx.Web.csproj**
 ``` 
 <Reference Include="System.Web.Http, Version=5.2.3.0" />
 <Reference Include="System.Web.Http.Cors" />
@@ -346,10 +349,10 @@ public class ProductsController : ApiController
 }
 ```
 
-**3.2 Parameter Binding Attributes**
+**3.2 Parameter Binding Attributes**  
 Parameter Binding Attributes are special annotations in ASP.NET that tell the framework where to get the data for action method parameters from incoming HTTP requests.
 
-The Problem They Solve  
+**The Problem They Solve**  
 When an HTTP request comes in, the framework needs to know:
 ```c#
 Should this parameter come from the URL?
@@ -530,7 +533,7 @@ public class ApiController : ControllerBase
 }
 ```
 
-3.3 Route Templates
+**3.3 Route Templates**
 ```c#
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
@@ -564,7 +567,7 @@ public class ProductsController : ControllerBase
     public IActionResult Delete(int id)
 }
 ```
-3.4 Return Types
+**3.4 Return Types**
 ```c#
 public class ApiController : ControllerBase
 {
@@ -608,7 +611,7 @@ public class ApiController : ControllerBase
     }
 }
 ```
-3.5 Advanced Routing Patterns
+**3.5 Advanced Routing Patterns**
 ```c#
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -638,7 +641,7 @@ public class ProductsController : ControllerBase
 }
 ```
 
-3.6 Authentication & Authorization
+**3.6 Authentication & Authorization**
 ```c#
 [Authorize]
 public class SecureController : ControllerBase
@@ -661,7 +664,7 @@ public class SecureController : ControllerBase
 }
 ```  
 
-3.7 Content Negotiation  
+**3.7 Content Negotiation**  
 The client tells the server what formats it prefers using HTTP headers, and the server responds with the most appropriate format.
 
 Client Request Headers:
