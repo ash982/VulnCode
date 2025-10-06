@@ -480,6 +480,34 @@ public class HomeController : Controller
     }
 }
 ```
-
+**3. Mixed Scenarios**
+```c#
+public class OrdersController : ControllerBase
+{
+    // When you need flexibility, use IActionResult
+    [HttpGet("{id}/export")]
+    public IActionResult Export(int id, string format)
+    {
+        var order = orderService.GetById(id);
+        if (order == null) return NotFound();
+        
+        return format.ToLower() switch
+        {
+            "pdf" => File(GeneratePdf(order), "application/pdf"),
+            "excel" => File(GenerateExcel(order), "application/vnd.openxmlformats"),
+            "json" => Ok(order),  // Different return types
+            _ => BadRequest("Unsupported format")
+        };
+    }
+    
+    // When you have consistent return type, use ActionResult<T>
+    [HttpGet("{id}")]
+    public ActionResult<Order> Get(int id)
+    {
+        var order = orderService.GetById(id);
+        return order ?? NotFound();
+    }
+}
+```
 ## .NET Core
 
