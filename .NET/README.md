@@ -408,7 +408,78 @@ public IActionResult GetDevices([FromQuery] RequestParameters parameters)
 }
 ```
 
+## The main differences between IActionResult and ActionResult in ASP.NET Core relate to interface vs class, flexibility, and type safety.
 
+|Feature | `IActionResult` | `ActionResult` | `ActionResult<T>`
+|:--- | :--- | :--- | :---|
+|Type | Interface | Abstract Class | Generic Class
+|Flexibility | Highest | High | Medium
+|Type Safety | None | None | High
+|Best For | MVC Views, Mixed APIs | General use | API endpoints
+|Swagger Docs | Manual | Manual | Automatic
+|IntelliSense | Generic | Generic | Strongly typed
+
+**Recommendation:**  
+Use ActionResult<T> for API controllers with consistent return types
+Use IActionResult for MVC controllers or when you need maximum flexibility
+ActionResult (non-generic) is rarely used directly - stick with the interface or generic version
+
+**Real-World Usage Patterns**  
+**1. API Controllers (Recommended: ActionResult<T>)**
+```c#
+[ApiController]
+[Route("api/[controller]")]
+public class ProductsController : ControllerBase
+{
+    // ✅ Best for APIs - type-safe and clear
+    [HttpGet("{id}")]
+    public ActionResult<Product> Get(int id)
+    {
+        var product = productService.GetById(id);
+        return product ?? NotFound();
+    }
+    
+    [HttpGet]
+    public ActionResult<List<Product>> GetAll()
+    {
+        return productService.GetAll();
+    }
+    
+    [HttpPost]
+    public ActionResult<Product> Create(Product product)
+    {
+        var created = productService.Create(product);
+        return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
+    }
+}
+```
+
+**2. MVC Controllers (Use IActionResult)**
+```c#
+public class HomeController : Controller
+{
+    // ✅ Good for MVC - returns views, redirects, etc.
+    public IActionResult Index()
+    {
+        return View();
+    }
+    
+    public IActionResult Privacy()
+    {
+        return View();
+    }
+    
+    [HttpPost]
+    public IActionResult Contact(ContactModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+            
+        // Process form
+        return RedirectToAction("Success");
+    }
+}
+```
 
 ## .NET Core
 
