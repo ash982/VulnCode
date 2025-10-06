@@ -425,7 +425,7 @@ Use IActionResult for MVC controllers or when you need maximum flexibility
 ActionResult (non-generic) is rarely used directly - stick with the interface or generic version  
 
 **Real-World Usage Patterns**  
-**1. API Controllers (Recommended: ActionResult<T>)**  
+**1. API Controllers (Recommended: `ActionResult<T>`)**  
 ```c#
 [ApiController]
 [Route("api/[controller]")]
@@ -454,7 +454,7 @@ public class ProductsController : ControllerBase
 }
 ```
 
-**2. MVC Controllers (Use IActionResult)**  
+**2. MVC Controllers (Use `IActionResult`)**  
 ```c#
 public class HomeController : Controller
 {
