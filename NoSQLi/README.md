@@ -78,7 +78,7 @@ The resulting MongoDB query becomes:
 
 The $gt operator means "greater than." The query now searches for all users where the username string is "greater than" an empty string. This condition is true for every username, so the query returns all user records from the database, not just a specific one. 
 
-**How to prevent PyMongo injection**
+**How to prevent PyMongo injection**  
 The best way to prevent this vulnerability is to ensure user input is never used directly to construct query operators. 
 1. Cast input to the expected type
 This is the simplest and most effective defense. If you expect a string, ensure that the input is treated as a string, not as a nested document. 
@@ -136,6 +136,44 @@ def sanitized_login():
     else:
         return 'Invalid credentials'
 ```
+
+**How to prevent Nodejs monogo injection**  
+bad code:  
+```javascript
+// client sends query like this: domain.com/api/users?email[$ne]=x
+// some parsers...
+console.log(req.query.email) // output -> { $ne: 'x'}
+const user = await User.find({ email: req.query.email }); // boom! 
+//it will fetch all users whose email is not "x"
+```
+
+good code:  
+**Using Express Mongo Sanitize**  
+Express Mongo Sanitize is a package that provides middleware to sanitize user input before it is used in a database query. It is designed specifically to prevent NoSQL injection attacks in Node.js applications that use MongoDB.
+```bash
+npm install express-mongo-sanitize
+```
+
+```javascript
+const express = require('express');
+const mongoSanitize = require('express-mongo-sanitize');
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/myapp');
+// Sanitize user input:
+// With this middleware in place, any user input that is sent in the request body or query parameters will be automatically sanitized before being used in a MongoDB query.
+app.use(mongoSanitize());
+// Retrieve user information
+app.get('/user', async (req, res) => {
+  try {
+    const user = await User.find({ email: req.query.email });
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+});
+```
+
 
 
 
