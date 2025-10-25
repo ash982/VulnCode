@@ -174,6 +174,134 @@ app.get('/user', async (req, res) => {
 });
 ```
 
+**Why String type check helps: for example 'tenantid' is used in nosql query**  
+.Prevents object injection: Blocks attacks like ?tenantid[$ne]=null or ?tenantid[$regex]=.*  
+.Ensures predictable behavior: MongoDB queries expect string values for tenant IDs  
+.Simple and effective: Easy to implement and understand  
 
+**Potential Limitations:**  
+.URL parsing behavior: Some Express.js query parsers might already convert objects to strings  
+.Nested objects: Depending on parser settings, complex objects might still get through  
+.No content validation: A string type check doesn't validate the actual content format  
 
+**Here are examples that could potentially bypass a simple string type check, depending on the Express.js configuration and query parsing settings:**  
+**1. Query Parser Configuration Issues**  
+If Express uses extended: true for URL encoding or certain query parsers:  
+```bash
+# These might still parse as objects depending on configuration
+curl "http://api.example.com/endpoint?tenantid[%24ne]=null"
+curl "http://api.example.com/endpoint?tenantid[%24regex]=.*"
+```
+
+**2. Array-based Bypass**  
+Some parsers might convert arrays to strings in unexpected ways:  
+```bash
+# Could become "value1,value2" or just "value1"
+curl "http://api.example.com/endpoint?tenantid[]=normalvalue&tenantid[]=%24ne"
+curl "http://api.example.com/endpoint?tenantid[0]=test&tenantid[1]=%24regex"
+```
+
+**3. Prototype Pollution**  
+```bash
+# Attempting to pollute Object.prototype
+curl "http://api.example.com/endpoint?tenantid[__proto__][isAdmin]=true&tenantid=normalvalue"
+```
+
+**4. Double Encoding**  
+```bash
+# URL double-encoding to bypass initial parsing
+curl "http://api.example.com/endpoint?tenantid=%257B%2524ne%253Anull%257D"
+# Decodes to: tenantid=%7B%24ne%3Anull%7D
+# Then to: tenantid={$ne:null}
+```
+
+**5. Content-Type Manipulation**  
+```bash
+# Sending JSON in body but parsed as query
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"tenantid": {"$ne": null}}' \
+  "http://api.example.com/endpoint"
+```
+
+**6. Unicode/Character Encoding**  
+```bash
+# Unicode characters that might be normalized later
+curl "http://api.example.com/endpoint?tenantid=test%C2%A0%24ne"
+# Null byte injection
+curl "http://api.example.com/endpoint?tenantid=validid%00%24ne%3Anull"
+```
+
+**7. Express Parser Edge Cases**  
+Depending on Express configuration:  
+```javascript
+// If using qs library with certain options
+app.use(express.urlencoded({ 
+  extended: true, 
+  parameterLimit: 1000,
+  // These settings might affect parsing
+}));
+```
+
+Attacks:  
+```bash
+curl "http://api.example.com/endpoint?tenantid.%24ne=null"
+curl "http://api.example.com/endpoint?tenantid%5B%24regex%5D=.*"
+```
+
+**Better Prevention Strategy:**  
+```javascript
+function tenantMapping(req, res, next) {
+  if (!req.query.tenantid) {
+    delete req.query.internaltenantid;
+    req.query.stime = req.query.stime || '-1';
+    return next();
+  }
+  
+  // More robust validation
+  let tenantid = req.query.tenantid;
+  
+  // Handle arrays (take first element or reject)
+  if (Array.isArray(tenantid)) {
+    tenantid = tenantid[0];
+  }
+  
+  // Strict type checking
+  if (typeof tenantid !== 'string') {
+    return errors.reportDump(new Error('tenantid must be a string'), res, 400, req);
+  }
+  
+  // Length and content validation
+  if (tenantid.length === 0 || tenantid.length > 100) {
+    return errors.reportDump(new Error('tenantid length invalid'), res, 400, req);
+  }
+  
+  // Character whitelist (adjust pattern as needed)
+  if (tenantid !== 'all' && !/^[a-zA-Z0-9_-]+$/.test(tenantid)) {
+    return errors.reportDump(new Error('tenantid contains invalid characters'), res, 400, req);
+  }
+  
+  // Sanitize and reassign
+  req.query.tenantid = tenantid;
+  
+  // Rest of logic...
+}
+```
+
+Additional Express.js Security Configuration:  
+```javascript
+// Secure query parsing configuration
+app.use(express.urlencoded({ 
+  extended: false,  // Use simple parser
+  parameterLimit: 10,
+  limit: '1mb'
+}));
+
+app.use(express.json({ 
+  limit: '1mb',
+  strict: true 
+}));
+```
+
+The key is implementing defense in depth rather than relying on a single type check.
 
