@@ -24,7 +24,7 @@ def process_question_with_nl2sql(user_question, db_schema):
     conn.close()
     
     return results
-```
+``` 
 Detecting NL2SQL usage in code primarily involves identifying patterns associated with natural language processing (NLP) and database interaction, particularly when an LLM or similar model is used to bridge the gap.
 Here are key indicators to look for:  
 **Import Statements for NLP and Database Libraries:**  
