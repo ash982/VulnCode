@@ -364,7 +364,7 @@ while (token != NULL) {
 
 ```yaml
 rules:
-  # Pattern 1: Return value discarded
+  # Pattern 1: Return value discarded (heuristic regex)
   - id: discarded-pointer-function-return
     message: >
       Return value of `$FUNC()` is discarded. If this function returns a pointer
@@ -385,7 +385,7 @@ rules:
           metavariable: $FUNC
           regex: (?i).*(get|alloc|new|create|open|dup|strdup|find|lookup|load|read|parse|oneline|print_ex).*
 
-  # Pattern 2: Assigned pointer used without NULL check
+  # Pattern 2: Assigned pointer used without NULL check (heuristic regex)
   - id: unchecked-pointer-before-use
     message: >
       Pointer `$PTR` returned by `$FUNC()` is used without a NULL check.
@@ -423,7 +423,7 @@ rules:
           metavariable: $FUNC
           regex: (?i).*(get|alloc|new|create|open|dup|strdup|find|lookup|load|read|parse|malloc|calloc).*
 
-  # Pattern 3: Chained call — inner result not checked
+  # Pattern 3: Chained call — inner result not checked (heuristic regex)
   - id: unchecked-chained-call-result
     message: >
       Return value of `$INNER()` is passed directly to `$OUTER()` without a NULL check.
@@ -510,7 +510,7 @@ rules:
       cwe: CWE-476
     pattern: $PTR = realloc($PTR, ...);
 
-  # Pattern 6: Struct member access on unchecked pointer
+  # Pattern 6: Struct member access on unchecked pointer (heuristic regex)
   - id: unchecked-struct-member-access
     message: >
       Pointer `$PTR` is used to access member `$FIELD` without a NULL check.
