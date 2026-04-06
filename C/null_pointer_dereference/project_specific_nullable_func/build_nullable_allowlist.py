@@ -13,22 +13,26 @@ Step 2: Generates a precise semgrep rules file (null_ptr_generated.yaml) that
           Rule 2 — Assigned pointer, no NULL check  (replaces: unchecked-pointer-before-use)
           Rule 3 — Struct member access unchecked   (replaces: unchecked-struct-member-access)
           Rule 4 — Chained call, inner unchecked    (replaces: unchecked-chained-call-result)
-          Rule 5 — Taint: NULL propagation          (improves: null-pointer-unchecked-taint sources)
+                   $OUTER is constrained to exclude null-safe functions discovered by
+                   find-null-safe-functions (panw.c.general.find-null-safe-functions.yaml)
+          Rule 5 — Taint: NULL propagation          (replaces: null-pointer-unchecked-taint)
 
         Rules 1–4 fully replace their heuristic counterparts. Do NOT run both.
-        Rule 5 improves the taint source list; the original null-pointer-unchecked-taint
-        rule should be replaced with this generated version.
+        Rule 5 replaces null-pointer-unchecked-taint. Do NOT run both.
 
 Usage:
-    # Run semgrep and pipe output into this script
-    semgrep --config find_nullable_functions.yaml --json <src_dir> \
+    # Run all discovery rules and pipe combined output into this script
+    semgrep --config panw.c.general.find-nullable-functions.yaml \
+            --config panw.c.general.find-null-safe-functions.yaml \
+            --config panw.c.general.find-nonnull-annotated-functions.yaml \
+            --json <src_dir> \
         | python build_nullable_allowlist.py [--output null_ptr_generated.yaml]
 
     # Or point at an existing semgrep JSON result file
     python build_nullable_allowlist.py --input semgrep_results.json \
                                        --output null_ptr_generated.yaml
 
-    # Dry-run: just print the discovered function list
+    # Dry-run: just print the discovered function lists
     python build_nullable_allowlist.py --input semgrep_results.json --list-only
 """
 
@@ -44,6 +48,9 @@ NULLABLE_RULE_IDS = {
 }
 NONNULL_RULE_IDS = {
     "find-nonnull-annotated-functions",
+}
+NULL_SAFE_RULE_IDS = {
+    "find-null-safe-functions",
 }
 
 METAVAR_FUNC = "FUNC"
@@ -83,14 +90,16 @@ def load_semgrep_json(source: str) -> dict:
         sys.exit(f"ERROR: Failed to parse semgrep JSON output: {e}")
 
 
-def extract_functions(results: dict, min_occurrences: int) -> tuple[set[str], set[str]]:
+def extract_functions(results: dict, min_occurrences: int) -> tuple[set[str], set[str], set[str]]:
     """
-    Returns (nullable_funcs, nonnull_funcs) extracted from semgrep findings.
-    nullable_funcs: functions with at least one return-NULL path
-    nonnull_funcs:  functions annotated returns_nonnull (exclude from rules)
+    Returns (nullable_funcs, nonnull_funcs, null_safe_funcs) extracted from semgrep findings.
+    nullable_funcs:   functions with at least one return-NULL path → taint sources / $INNER
+    nonnull_funcs:    functions annotated returns_nonnull → excluded from nullable list
+    null_safe_funcs:  functions that check pointer params for NULL → excluded from $OUTER in Rule 4
     """
     nullable_counts: dict[str, int] = {}
     nonnull_funcs: set[str] = set()
+    null_safe_funcs: set[str] = set()
 
     for finding in results.get("results", []):
         rule_id = finding.get("check_id", "").split(".")[-1]  # strip rule file prefix
@@ -104,12 +113,14 @@ def extract_functions(results: dict, min_occurrences: int) -> tuple[set[str], se
             nullable_counts[func_name] = nullable_counts.get(func_name, 0) + 1
         elif rule_id in NONNULL_RULE_IDS:
             nonnull_funcs.add(func_name)
+        elif rule_id in NULL_SAFE_RULE_IDS:
+            null_safe_funcs.add(func_name)
 
     nullable_funcs = {f for f, count in nullable_counts.items() if count >= min_occurrences}
     # Remove any function that is also annotated nonnull (annotation wins)
     nullable_funcs -= nonnull_funcs
 
-    return nullable_funcs, nonnull_funcs
+    return nullable_funcs, nonnull_funcs, null_safe_funcs
 
 
 def build_exact_regex(func_names: set[str]) -> str:
@@ -118,7 +129,7 @@ def build_exact_regex(func_names: set[str]) -> str:
     return "^(" + "|".join(escaped) + ")$"
 
 
-def generate_rules(nullable_funcs: set[str], nonnull_funcs: set[str]) -> str:
+def generate_rules(nullable_funcs: set[str], nonnull_funcs: set[str], null_safe_funcs: set[str]) -> str:
     """Generate a semgrep YAML rules file with exact function allowlist."""
     if not nullable_funcs:
         sys.exit("No nullable functions found. Nothing to generate.")
@@ -130,6 +141,18 @@ def generate_rules(nullable_funcs: set[str], nonnull_funcs: set[str]) -> str:
 
     func_list_comment = "\n    #   - ".join(sorted(nullable_funcs))
     stdlib_list_comment = ", ".join(sorted(STDLIB_NULLABLE_FUNCS))
+
+    # Rule 4: build $OUTER exclusion regex from null-safe functions if any were discovered
+    if null_safe_funcs:
+        null_safe_list = "|".join(sorted(null_safe_funcs))
+        outer_constraint = f"""\
+      - metavariable-regex:
+          metavariable: $OUTER
+          regex: '^(?!({null_safe_list})$).*'"""
+        null_safe_comment = f"# Null-safe functions excluded from $OUTER ({len(null_safe_funcs)}): " + ", ".join(sorted(null_safe_funcs))
+    else:
+        outer_constraint = ""
+        null_safe_comment = "# No null-safe functions discovered — $OUTER is unconstrained"
 
     rules = f"""\
 # AUTO-GENERATED by build_nullable_allowlist.py
@@ -143,6 +166,8 @@ def generate_rules(nullable_funcs: set[str], nonnull_funcs: set[str]) -> str:
 #
 # Fixed stdlib nullable functions (always included in Rule 5 taint sources):
 #   {stdlib_list_comment}
+#
+# {null_safe_comment}
 #
 # Rules 1-4 replace their heuristic counterparts — do NOT run both.
 # Rule 5 replaces null-pointer-unchecked-taint — do NOT run both.
@@ -245,6 +270,8 @@ rules:
 
   # ── Rule 4: Chained call — inner result passed without NULL check ────────────
   # Replaces: unchecked-chained-call-result
+  # $INNER constrained to known nullable functions (exact list).
+  # $OUTER constrained to exclude known null-safe functions (discovered by find-null-safe-functions).
   - id: generated-unchecked-chained-nullable-call
     message: >
       Return value of `$INNER()` is passed directly to `$OUTER()` without a NULL check.
@@ -259,6 +286,7 @@ rules:
       - metavariable-regex:
           metavariable: $INNER
           regex: '{exact_regex}'
+{outer_constraint}
 
   # ── Rule 5: Taint — NULL propagation (intra and cross-file) ─────────────────
   # Replaces: null-pointer-unchecked-taint
@@ -300,10 +328,11 @@ def main() -> None:
     args = parse_args()
 
     raw = load_semgrep_json(args.input)
-    nullable_funcs, nonnull_funcs = extract_functions(raw, args.min_occurrences)
+    nullable_funcs, nonnull_funcs, null_safe_funcs = extract_functions(raw, args.min_occurrences)
 
-    print(f"[+] Nullable functions found:  {len(nullable_funcs)}", file=sys.stderr)
-    print(f"[+] Non-null annotated (excluded): {len(nonnull_funcs)}", file=sys.stderr)
+    print(f"[+] Nullable functions found:       {len(nullable_funcs)}", file=sys.stderr)
+    print(f"[+] Non-null annotated (excluded):  {len(nonnull_funcs)}", file=sys.stderr)
+    print(f"[+] Null-safe functions (excluded from $OUTER): {len(null_safe_funcs)}", file=sys.stderr)
 
     if args.list_only:
         print("\nNullable functions:")
@@ -313,9 +342,13 @@ def main() -> None:
             print("\nExcluded (returns_nonnull annotated):")
             for f in sorted(nonnull_funcs):
                 print(f"  {f}")
+        if null_safe_funcs:
+            print("\nNull-safe functions (excluded from $OUTER in Rule 4):")
+            for f in sorted(null_safe_funcs):
+                print(f"  {f}")
         return
 
-    rules_yaml = generate_rules(nullable_funcs, nonnull_funcs)
+    rules_yaml = generate_rules(nullable_funcs, nonnull_funcs, null_safe_funcs)
     Path(args.output).write_text(rules_yaml)
     print(f"[+] Generated rules written to: {args.output}", file=sys.stderr)
     print(f"[+] Rules 1-4 replace heuristic OSS rules — do not run both.", file=sys.stderr)
