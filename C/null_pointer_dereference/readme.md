@@ -938,26 +938,28 @@ Re-run the toolchain whenever new functions are added or existing ones are modif
 
 ## Detection Coverage Summary
 
-| Pattern | Description | Vulnerable Example | OSS Rule ID | Pro Taint Rule ID | Coverage | `find_nullable_functions` |
-|---|---|---|---|---|---|---|
-| 1 | Discarded return value | `X509_NAME_oneline(issuer, buf, 1024);` | `discarded-pointer-function-return` | — | OSS only | Yes — replaces heuristic regex with exact function list |
-| 2 | Assigned pointer, no NULL check (intra) | `char *p = get_data(); use(p);` | `unchecked-pointer-before-use` | `null-pointer-unchecked-taint` | Both | Yes — replaces heuristic regex with exact function list |
-| 2 | Assigned pointer, no NULL check (cross-file) | return value of `get_data()` passed to another file unchecked | — | `null-pointer-unchecked-taint` | Pro only | Yes |
-| 3 | Chained call without NULL check | `X509_NAME_oneline(X509_get_issuer_name(c), buf, 1024);` | `unchecked-chained-call-result` | — | OSS only | Yes — replaces heuristic regex with exact function list |
-| 4 | Pointer param direct dereference | `size_t f(char *str) { return *str; }` | `pointer-param-dereferenced-without-null-check` | `pointer-param-indirect-deref-taint` | Both | No — targets parameter input, not return values |
-| 4 | Pointer param indirect dereference (`p = str; *p`) | `const char *p = str; *p;` | — | `pointer-param-indirect-deref-taint` | Pro only | No |
-| 5 | Failed `malloc`/`calloc` | `char *buf = malloc(1024); strcpy(buf, s);` | `unchecked-malloc-result` | `null-pointer-unchecked-taint` | Both | No — fixed stdlib names, no project-specific variants |
-| 5b | `realloc` overwrites original pointer | `buf = realloc(buf, n);` | `realloc-overwrites-original-pointer` | — | OSS only | No |
-| 6 | Struct member access on unchecked pointer | `node = find_node(l, k); node->value = 42;` | `unchecked-struct-member-access` | `null-pointer-unchecked-taint` | Both | Yes — replaces heuristic regex with exact function list |
-| 7 | `strstr`/`strchr` result not checked | `char *p = strstr(buf, "key="); p += 4;` | `unchecked-string-search-result` | `null-pointer-unchecked-taint` | Both | No — fixed stdlib names |
-| 8 | `getenv`/`fopen` result not checked | `char *h = getenv("HOME"); strlen(h);` | `unchecked-system-function-result` | `null-pointer-unchecked-taint` | Both | No — fixed stdlib names |
-| 9 | Conditional NULL (only set in some paths) | `char *r = NULL; if (c) r = alloc(); use(r);` | — | `null-pointer-unchecked-taint` | Pro only | No — dataflow, not function-name driven |
-| 10 | NULL propagation across function calls | `char *cn = get_cn(cert); printf("%s", cn);` | — | `null-pointer-unchecked-taint` | Pro only | No — dataflow, not function-name driven |
-| 11a | C++ unchecked `dynamic_cast` | `Derived *d = dynamic_cast<Derived*>(b); d->method();` | `unchecked-dynamic-cast` | — | OSS only | No — language construct, not a named function |
-| 11b | C++ unchecked `std::get_if` | `auto *v = std::get_if<int>(&var); *v = 42;` | `unchecked-get-if-result` | — | OSS only | No — language construct, not a named function |
-| 12 | C++ iterator `find()` result not checked | `auto it = m.find(k); return it->second;` | `unchecked-map-find-result` | `unchecked-map-find-taint` | Both | No — fixed stdlib names |
-| 13 | Uninitialized out-parameter (CWE-457) | `int *out; get_val(&out); printf("%d", *out);` | — | `uninitialized-out-param-taint` | Pro only (partial — return-code sanitizer required) | No — dataflow, not function-name driven |
-| 14 | `strtok`/`strtok_r`/`strsep` exhaustion | `while(1) { use(tok); tok = strtok(NULL, ","); }` | `strtok-loop-without-null-check` | `strtok-result-null-check-taint` | Both | No — fixed stdlib names |
+| Pattern | Description | Vulnerable Example | OSS Rule ID | Pro Taint Rule ID | Coverage | Confidence | `find_nullable_functions` |
+|---|---|---|---|---|---|---|---|
+| 1 | Discarded return value | `X509_NAME_oneline(issuer, buf, 1024);` | `discarded-pointer-function-return` | — | OSS only | Medium — heuristic regex on function names; rises to High with `find_nullable_functions` | Yes — replaces heuristic regex with exact function list |
+| 2 | Assigned pointer, no NULL check (intra) | `char *p = get_data(); use(p);` | `unchecked-pointer-before-use` | `null-pointer-unchecked-taint` | Both | Medium — heuristic regex; `pattern-not` may miss uncommon sanitizer forms | Yes — replaces heuristic regex with exact function list |
+| 2 | Assigned pointer, no NULL check (cross-file) | return value of `get_data()` passed to another file unchecked | — | `null-pointer-unchecked-taint` | Pro only | Medium — taint may over-approximate across file boundaries | Yes |
+| 3 | Chained call without NULL check | `X509_NAME_oneline(X509_get_issuer_name(c), buf, 1024);` | `unchecked-chained-call-result` | — | OSS only | Medium — OUTER exclusion regex may not cover all safe wrappers | Yes — replaces heuristic regex with exact function list |
+| 4 | Pointer param direct dereference | `size_t f(char *str) { return *str; }` | `pointer-param-dereferenced-without-null-check` | `pointer-param-indirect-deref-taint` | Both | Medium — callers may guarantee non-NULL by convention; no caller-side analysis | No — targets parameter input, not return values |
+| 4 | Pointer param indirect dereference (`p = str; *p`) | `const char *p = str; *p;` | — | `pointer-param-indirect-deref-taint` | Pro only | Medium | No |
+| 5 | Failed `malloc`/`calloc` | `char *buf = malloc(1024); strcpy(buf, s);` | `unchecked-malloc-result` | `null-pointer-unchecked-taint` | Both | High — exact stdlib names; unchecked malloc result is always wrong | No — fixed stdlib names, no project-specific variants |
+| 5b | `realloc` overwrites original pointer | `buf = realloc(buf, n);` | `realloc-overwrites-original-pointer` | — | OSS only | High — structural pattern `$PTR = realloc($PTR, ...)` is always a bug | No |
+| 6 | Struct member access on unchecked pointer | `node = find_node(l, k); node->value = 42;` | `unchecked-struct-member-access` | `null-pointer-unchecked-taint` | Both | Medium — heuristic regex on function names | Yes — replaces heuristic regex with exact function list |
+| 7 | `strstr`/`strchr` result not checked | `char *p = strstr(buf, "key="); p += 4;` | `unchecked-string-search-result` | `null-pointer-unchecked-taint` | Both | High — exact stdlib names; arithmetic on result without check is always a crash | No — fixed stdlib names |
+| 8 | `getenv`/`fopen` result not checked | `char *h = getenv("HOME"); strlen(h);` | `unchecked-system-function-result` | `null-pointer-unchecked-taint` | Both | High — exact stdlib names; NULL return is documented and common | No — fixed stdlib names |
+| 9 | Conditional NULL (only set in some paths) | `char *r = NULL; if (c) r = alloc(); use(r);` | — | `null-pointer-unchecked-taint` | Pro only | Medium — taint may flag cases where all real callers always satisfy the condition | No — dataflow, not function-name driven |
+| 10 | NULL propagation across function calls | `char *cn = get_cn(cert); printf("%s", cn);` | — | `null-pointer-unchecked-taint` | Pro only | Medium — inter-procedural taint may over-approximate through wrapper chains | No — dataflow, not function-name driven |
+| 11a | C++ unchecked `dynamic_cast` | `Derived *d = dynamic_cast<Derived*>(b); d->method();` | `unchecked-dynamic-cast` | — | OSS only | High — cast failure is well-defined; missing nullptr check is always unsafe | No — language construct, not a named function |
+| 11b | C++ unchecked `std::get_if` | `auto *v = std::get_if<int>(&var); *v = 42;` | `unchecked-get-if-result` | — | OSS only | High — nullptr return on type mismatch is well-defined | No — language construct, not a named function |
+| 12 | C++ iterator `find()` result not checked | `auto it = m.find(k); return it->second;` | `unchecked-map-find-result` | `unchecked-map-find-taint` | Both | High — dereferencing `end()` is always UB | No — fixed stdlib names |
+| 13 | Uninitialized out-parameter (CWE-457) | `int *out; get_val(&out); printf("%d", *out);` | — | `uninitialized-out-param-taint` | Pro only (partial — return-code sanitizer required) | Low — partial coverage; return-code check sanitizer may miss non-standard error conventions | No — dataflow, not function-name driven |
+| 14 | `strtok`/`strtok_r`/`strsep` exhaustion | `while(1) { use(tok); tok = strtok(NULL, ","); }` | `strtok-loop-without-null-check` | `strtok-result-null-check-taint` | Both | High (OSS) / Medium (taint — may flag intentional sentinel loops) | No — fixed stdlib names |
+
+
 
 > **OSS-only patterns** — covered by OSS rule but no Pro taint rule is possible:
 > - Pattern 3 — inner call value is ephemeral (never assigned to a variable taint can track)
