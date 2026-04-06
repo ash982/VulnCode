@@ -291,7 +291,7 @@ rules:
           - pattern: $FUNC($X, ...)
           - metavariable-regex:
               metavariable: $FUNC
-              regex: (?i).*(oneline|print|strstr|strcmp|strlen|memcpy|use|process|strchr|fread|fwrite).*
+              regex: (?i).*(print|strstr|strcmp|strlen|memcpy|strchr|fread|fwrite).*
 """
     return rules
 
