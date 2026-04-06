@@ -888,12 +888,6 @@ Rather than relying on heuristic regex patterns for function names, use the prov
 
 | File | Purpose |
 |---|---|
-| `find_nullable_functions.yaml` | Semgrep rule — discovers all functions with a `return NULL` path |
-| `build_nullable_allowlist.py` | Script — parses results, generates precise rules with exact allowlist |
-| `null_ptr_generated.yaml` | Output — generated semgrep rules (do not edit manually) |
-
-| File | Purpose |
-|---|---|
 | `find-nullable-functions.yaml` | Semgrep rule — discovers all functions with a `return NULL` / `return nullptr` path |
 | `find-nonnull-annotated-functions.yaml` | Semgrep rule — discovers functions annotated `returns_nonnull`; excluded from nullable list |
 | `find-null-safe-functions.yaml` | Semgrep rule — discovers functions that check pointer params for NULL; excluded from `$OUTER` in Rule 4 |
