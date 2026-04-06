@@ -964,10 +964,8 @@ Re-run the toolchain whenever new functions are added or existing ones are modif
 > - Pattern 5b — `realloc` overwrite is structural, not a data flow
 > - Patterns 11a/11b — `dynamic_cast` / `std::get_if` are language constructs with no taintable source
 >
-> All other patterns with `—` in the OSS column are covered by their Pro taint rule.
-
-
-
+> - All other patterns with `—` in the OSS column are covered by their Pro taint rule.
+> - Every pattern now has at least one rule. The note correctly distinguishes between "OSS-only" (has OSS but taint can't be added) and "Pro-only" (has taint but OSS can't detect it) — no pattern is truly uncovered.
 
 ---
 ## References
@@ -982,7 +980,7 @@ Re-run the toolchain whenever new functions are added or existing ones are modif
 
 ---
 
-## 'return nullptr;' is not same as 'return NULL'  
+## 'return nullptr;' is not same as 'return NULL;'  
 In C++11 and later, nullptr is preferred and safer:
 
   - nullptr — a typed null pointer constant (std::nullptr_t). Cannot be accidentally used as an integer.
