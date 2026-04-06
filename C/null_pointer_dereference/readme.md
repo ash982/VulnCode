@@ -776,6 +776,7 @@ rules:
 ```
 
 
+
 ---
 
 ## Out-of-Scope: CWE-789 (Memory Allocation with Excessive Size Value)
