@@ -855,7 +855,31 @@ The two failure paths and their CWEs:
 ---
 
 ## Toolchain: Building a Project-Specific Allowlist
+In the rule "id: discarded-pointer-function-return",  
+```regex: (?i).*(get|alloc|new|create|open|dup|strdup|find|lookup|load|read|parse|oneline|print_ex).*```                                                         
 
+| Term | Rationale |
+|---|---|
+| get | X509_get_issuer_name, getenv, pthread_getspecific — getters often return NULL on failure |
+| alloc | malloc, calloc, custom allocators — allocation can fail                                  |
+| new | C++ style allocators, factory functions                                                  |
+| create | Factory pattern — returns NULL if resource creation fails                                |
+| open | fopen, opendir, dlopen — NULL on missing resource                                        |
+| dup | strdup, strndup — calls malloc internally, can return NULL                               |
+| strdup | Explicit inclusion since it's a very common source                                       |
+| find | strstr, strchr, map lookups — NULL when not found                                        |
+| lookup | Hash/table lookups — NULL when key absent                                                |
+| load | dlopen, config/file loaders — NULL on failure                                            |
+| read | Parsers, stream readers — NULL on EOF or error                                           |
+| parse | Parsers that return NULL on malformed input                                              |
+| oneline | X509_NAME_oneline specifically — the motivating example                                  |
+| print_ex | OpenSSL print functions that can fail                                                    |
+
+It's a **heuristic** based on common C/C++ naming conventions for functions that typically return a pointer that can be NULL.  
+The problem is it's both directions:  
+  - **Overfitting** — get_version(), create_label(), new_id() may never return NULL but still match  
+  - **Underfitting** — extract_field(), fetch_token(), resolve_path() return NULL but don't match                                                                                                                          
+This is exactly why **find_nullable_functions** exists — to replace this guess with functions that provably have a return NULL path in your codebase.                                                                  
 Rather than relying on heuristic regex patterns for function names, use the provided toolchain to derive an exact allowlist from your codebase.
 
 ### Files
@@ -903,11 +927,21 @@ regex: (?i).*(get|alloc|new|create|open).*
 regex: '^(X509_get_issuer_name|find_node|get_cn|parse_config)$'
 ```
 
-Four rules are generated automatically:
-1. Discarded return value
-2. Assigned pointer used without NULL check
-3. Struct member access on unchecked pointer
-4. Chained call with unchecked inner result
+Four rules are generated automatically, replacing their heuristic counterparts:
+
+| Generated rule (in `null_ptr_generated.yaml`) | Heuristic rule to drop |
+|---|---|
+| Discarded return value | `discarded-pointer-function-return` |
+| Assigned pointer used without NULL check | `unchecked-pointer-before-use` |
+| Struct member access on unchecked pointer | `unchecked-struct-member-access` |
+| Chained call with unchecked inner result | `unchecked-chained-call-result` |
+
+> Do **not** run the heuristic rules alongside the generated rules — doing so produces duplicate findings and reintroduces the false positives the toolchain was designed to eliminate.
+>
+> **Exception:** keep the heuristic rules scoped to third-party library headers where source is unavailable for scanning and `find_nullable_functions` cannot discover nullable functions.
+
+
+
 
 ### Fitting trade-offs across all patterns
 
@@ -929,6 +963,12 @@ The toolchain solves overfitting for project-specific functions by replacing the
 | 12 (`map::find`) | `unordered_map`, `multimap`, and other STL/custom containers |
 | 14 (`strtok`) | `strtok_r`, `strsep` — same token-exhaustion behavior |
 
+When using the toolchain, null_ptr_generated.yaml replaces the heuristic rule entirely for patterns 1, 2, 3, and 6. Running both would cause:  
+  - Duplicate findings for functions in your codebase  
+  - Extra false positives from the heuristic on top of the exact list
+
+
+  
 ### Refresh cadence
 
 Re-run the toolchain whenever new functions are added or existing ones are modified. The generated file is clearly marked `AUTO-GENERATED` and should not be edited manually.
@@ -940,15 +980,15 @@ Re-run the toolchain whenever new functions are added or existing ones are modif
 
 | Pattern | Description | Vulnerable Example | OSS Rule ID | Pro Taint Rule ID | Coverage | Confidence | `find_nullable_functions` |
 |---|---|---|---|---|---|---|---|
-| 1 | Discarded return value | `X509_NAME_oneline(issuer, buf, 1024);` | `discarded-pointer-function-return` | — | OSS only | Medium — heuristic regex on function names; rises to High with `find_nullable_functions` | Yes — replaces heuristic regex with exact function list |
-| 2 | Assigned pointer, no NULL check (intra) | `char *p = get_data(); use(p);` | `unchecked-pointer-before-use` | `null-pointer-unchecked-taint` | Both | Medium — heuristic regex; `pattern-not` may miss uncommon sanitizer forms | Yes — replaces heuristic regex with exact function list |
-| 2 | Assigned pointer, no NULL check (cross-file) | return value of `get_data()` passed to another file unchecked | — | `null-pointer-unchecked-taint` | Pro only | Medium — taint may over-approximate across file boundaries | Yes |
-| 3 | Chained call without NULL check | `X509_NAME_oneline(X509_get_issuer_name(c), buf, 1024);` | `unchecked-chained-call-result` | — | OSS only | Medium — OUTER exclusion regex may not cover all safe wrappers | Yes — replaces heuristic regex with exact function list |
+| 1 | Discarded return value | `X509_NAME_oneline(issuer, buf, 1024);` | `discarded-pointer-function-return` | — | OSS only | Medium — heuristic regex on function names; rises to High with `find_nullable_functions` | **Replaces** heuristic rule — drop `discarded-pointer-function-return` when using toolchain |
+| 2 | Assigned pointer, no NULL check (intra) | `char *p = get_data(); use(p);` | `unchecked-pointer-before-use` | `null-pointer-unchecked-taint` | Both | Medium — heuristic regex; `pattern-not` may miss uncommon sanitizer forms | **Replaces** heuristic rule — drop `unchecked-pointer-before-use` when using toolchain |
+| 2 | Assigned pointer, no NULL check (cross-file) | return value of `get_data()` passed to another file unchecked | — | `null-pointer-unchecked-taint` | Pro only | Medium — taint may over-approximate across file boundaries | **Replaces** heuristic rule |
+| 3 | Chained call without NULL check | `X509_NAME_oneline(X509_get_issuer_name(c), buf, 1024);` | `unchecked-chained-call-result` | — | OSS only | Medium — OUTER exclusion regex may not cover all safe wrappers | **Replaces** heuristic rule — drop `unchecked-chained-call-result` when using toolchain |
 | 4 | Pointer param direct dereference | `size_t f(char *str) { return *str; }` | `pointer-param-dereferenced-without-null-check` | `pointer-param-indirect-deref-taint` | Both | Medium — callers may guarantee non-NULL by convention; no caller-side analysis | No — targets parameter input, not return values |
 | 4 | Pointer param indirect dereference (`p = str; *p`) | `const char *p = str; *p;` | — | `pointer-param-indirect-deref-taint` | Pro only | Medium | No |
 | 5 | Failed `malloc`/`calloc` | `char *buf = malloc(1024); strcpy(buf, s);` | `unchecked-malloc-result` | `null-pointer-unchecked-taint` | Both | High — exact stdlib names; unchecked malloc result is always wrong | No — fixed stdlib names, no project-specific variants |
 | 5b | `realloc` overwrites original pointer | `buf = realloc(buf, n);` | `realloc-overwrites-original-pointer` | — | OSS only | High — structural pattern `$PTR = realloc($PTR, ...)` is always a bug | No |
-| 6 | Struct member access on unchecked pointer | `node = find_node(l, k); node->value = 42;` | `unchecked-struct-member-access` | `null-pointer-unchecked-taint` | Both | Medium — heuristic regex on function names | Yes — replaces heuristic regex with exact function list |
+| 6 | Struct member access on unchecked pointer | `node = find_node(l, k); node->value = 42;` | `unchecked-struct-member-access` | `null-pointer-unchecked-taint` | Both | Medium — heuristic regex on function names | **Replaces** heuristic rule — drop `unchecked-struct-member-access` when using toolchain |
 | 7 | `strstr`/`strchr` result not checked | `char *p = strstr(buf, "key="); p += 4;` | `unchecked-string-search-result` | `null-pointer-unchecked-taint` | Both | High — exact stdlib names; arithmetic on result without check is always a crash | No — fixed stdlib names |
 | 8 | `getenv`/`fopen` result not checked | `char *h = getenv("HOME"); strlen(h);` | `unchecked-system-function-result` | `null-pointer-unchecked-taint` | Both | High — exact stdlib names; NULL return is documented and common | No — fixed stdlib names |
 | 9 | Conditional NULL (only set in some paths) | `char *r = NULL; if (c) r = alloc(); use(r);` | — | `null-pointer-unchecked-taint` | Pro only | Medium — taint may flag cases where all real callers always satisfy the condition | No — dataflow, not function-name driven |
@@ -958,6 +998,7 @@ Re-run the toolchain whenever new functions are added or existing ones are modif
 | 12 | C++ iterator `find()` result not checked | `auto it = m.find(k); return it->second;` | `unchecked-map-find-result` | `unchecked-map-find-taint` | Both | High — dereferencing `end()` is always UB | No — fixed stdlib names |
 | 13 | Uninitialized out-parameter (CWE-457) | `int *out; get_val(&out); printf("%d", *out);` | — | `uninitialized-out-param-taint` | Pro only (partial — return-code sanitizer required) | Low — partial coverage; return-code check sanitizer may miss non-standard error conventions | No — dataflow, not function-name driven |
 | 14 | `strtok`/`strtok_r`/`strsep` exhaustion | `while(1) { use(tok); tok = strtok(NULL, ","); }` | `strtok-loop-without-null-check` | `strtok-result-null-check-taint` | Both | High (OSS) / Medium (taint — may flag intentional sentinel loops) | No — fixed stdlib names |
+
 
 
 
