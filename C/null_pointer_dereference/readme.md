@@ -364,7 +364,7 @@ while (token != NULL) {
 
 ```yaml
 rules:
-  # Pattern 1: Return value discarded (heuristic regex)
+  # Pattern 1: Return value discarded
   - id: discarded-pointer-function-return
     message: >
       Return value of `$FUNC()` is discarded. If this function returns a pointer
@@ -385,7 +385,7 @@ rules:
           metavariable: $FUNC
           regex: (?i).*(get|alloc|new|create|open|dup|strdup|find|lookup|load|read|parse|oneline|print_ex).*
 
-  # Pattern 2: Assigned pointer used without NULL check (heuristic regex)
+  # Pattern 2: Assigned pointer used without NULL check
   - id: unchecked-pointer-before-use
     message: >
       Pointer `$PTR` returned by `$FUNC()` is used without a NULL check.
@@ -423,7 +423,7 @@ rules:
           metavariable: $FUNC
           regex: (?i).*(get|alloc|new|create|open|dup|strdup|find|lookup|load|read|parse|malloc|calloc).*
 
-  # Pattern 3: Chained call — inner result not checked (heuristic regex)
+  # Pattern 3: Chained call — inner result not checked
   - id: unchecked-chained-call-result
     message: >
       Return value of `$INNER()` is passed directly to `$OUTER()` without a NULL check.
@@ -468,11 +468,20 @@ rules:
             ...
           }
 
-  # Pattern 5: malloc/calloc result not checked
-  - id: unchecked-malloc-result
+  # Patterns 5, 7, 8 (combined): stdlib nullable result not checked
+  # Covers:
+  #   - Memory allocation: malloc, calloc, aligned_alloc, valloc
+  #   - String search:     strstr, strchr, strrchr, strpbrk, memmem
+  #   - System/env/IO:     getenv, fopen, fdopen, freopen, opendir, dlopen, popen
+  - id: unchecked-stdlib-nullable-result
     message: >
-      Return value of `$FUNC()` is not checked for NULL.
-      Memory allocation functions return NULL on failure; using the result causes a crash.
+      Return value of `$FUNC()` is used without a NULL check.
+      Covered stdlib categories —
+      memory allocation (malloc, calloc, aligned_alloc, valloc): returns NULL on allocation failure;
+      string search (strstr, strchr, strrchr, strpbrk, memmem): returns NULL when pattern not found;
+      system/env/IO (getenv, fopen, fdopen, freopen, opendir, dlopen, popen): returns NULL when
+      the variable, file, or resource does not exist or cannot be opened.
+      Using the result without checking causes a crash.
     severity: ERROR
     languages: [c, cpp]
     metadata:
@@ -496,7 +505,7 @@ rules:
           if ($PTR) { ... }
       - metavariable-regex:
           metavariable: $FUNC
-          regex: ^(malloc|calloc|aligned_alloc|valloc)$
+          regex: ^(malloc|calloc|aligned_alloc|valloc|strstr|strchr|strrchr|strpbrk|memmem|getenv|fopen|fdopen|freopen|opendir|dlopen|popen)$
 
   # Pattern 5b: realloc overwrites original pointer — memory leak on failure
   - id: realloc-overwrites-original-pointer
@@ -510,7 +519,7 @@ rules:
       cwe: CWE-476
     pattern: $PTR = realloc($PTR, ...);
 
-  # Pattern 6: Struct member access on unchecked pointer (heuristic regex)
+  # Pattern 6: Struct member access on unchecked pointer
   - id: unchecked-struct-member-access
     message: >
       Pointer `$PTR` is used to access member `$FIELD` without a NULL check.
@@ -539,66 +548,6 @@ rules:
       - metavariable-regex:
           metavariable: $FUNC
           regex: (?i).*(get|find|lookup|alloc|new|create|open|load|read|parse).*
-
-  # Pattern 7: String search result used without NULL check
-  - id: unchecked-string-search-result
-    message: >
-      Result of `$FUNC()` is used without a NULL check.
-      String search functions return NULL when the pattern is not found.
-    severity: ERROR
-    languages: [c, cpp]
-    metadata:
-      cwe: [CWE-476, CWE-690]
-    patterns:
-      - pattern: |
-          $TYPE *$PTR = $FUNC(...);
-          ...
-          $USE($PTR, ...);
-      - pattern-not: |
-          $TYPE *$PTR = $FUNC(...);
-          ...
-          if ($PTR == NULL) { ... }
-      - pattern-not: |
-          $TYPE *$PTR = $FUNC(...);
-          ...
-          if (!$PTR) { ... }
-      - pattern-not: |
-          $TYPE *$PTR = $FUNC(...);
-          ...
-          if ($PTR) { ... }
-      - metavariable-regex:
-          metavariable: $FUNC
-          regex: ^(strstr|strchr|strrchr|strpbrk|memmem)$
-
-  # Pattern 8: getenv / fopen result not checked
-  - id: unchecked-system-function-result
-    message: >
-      Return value of `$FUNC()` is not checked for NULL.
-      System functions return NULL when the resource does not exist or the call fails.
-    severity: ERROR
-    languages: [c, cpp]
-    metadata:
-      cwe: [CWE-476, CWE-690]
-    patterns:
-      - pattern: |
-          $TYPE *$PTR = $FUNC(...);
-          ...
-          $USE($PTR, ...);
-      - pattern-not: |
-          $TYPE *$PTR = $FUNC(...);
-          ...
-          if ($PTR == NULL) { ... }
-      - pattern-not: |
-          $TYPE *$PTR = $FUNC(...);
-          ...
-          if (!$PTR) { ... }
-      - pattern-not: |
-          $TYPE *$PTR = $FUNC(...);
-          ...
-          if ($PTR) { ... }
-      - metavariable-regex:
-          metavariable: $FUNC
-          regex: ^(getenv|fopen|fdopen|freopen|opendir|dlopen|popen)$
 
   # Pattern 11: C++ unchecked dynamic_cast
   - id: unchecked-dynamic-cast
@@ -686,6 +635,7 @@ rules:
         ...
       }
 ```
+
 
 ---
 
@@ -1002,11 +952,9 @@ Re-run the toolchain whenever new functions are added or existing ones are modif
 | 3 | Chained call without NULL check | `X509_NAME_oneline(X509_get_issuer_name(c), buf, 1024);` | `unchecked-chained-call-result` | — | OSS only → **Generated OSS only** (taint cannot track ephemeral inner value) | Medium → **High** with toolchain (`$INNER` exact, `$OUTER` excludes null-safe functions) | **Replaces** heuristic rule — `$INNER` uses exact nullable list; `$OUTER` excludes functions discovered by `find-null-safe-functions` |
 | 4 | Pointer param direct dereference | `size_t f(char *str) { return *str; }` | `pointer-param-dereferenced-without-null-check` | `pointer-param-indirect-deref-taint` | Both (unchanged) | Medium — callers may guarantee non-NULL by convention; no caller-side analysis | No — targets parameter input, not return values |
 | 4 | Pointer param indirect dereference (`p = str; *p`) | `const char *p = str; *p;` | — | `pointer-param-indirect-deref-taint` | Pro only (unchanged) | Medium | No |
-| 5 | Failed `malloc`/`calloc` | `char *buf = malloc(1024); strcpy(buf, s);` | `unchecked-malloc-result` | `null-pointer-unchecked-taint` | Both → **Both (stdlib in generated taint sources)** | High — exact stdlib names; unchecked malloc result is always wrong | No — fixed stdlib names included in generated taint sources automatically |
+| 5/7/8 | Stdlib nullable result not checked (memory alloc, string search, system/IO) | `char *buf = malloc(1024); strcpy(buf, s);` / `char *p = strstr(buf, "key="); p += 4;` / `char *h = getenv("HOME"); strlen(h);` | `unchecked-stdlib-nullable-result` | `null-pointer-unchecked-taint` | Both → **Both (stdlib in generated taint sources)** | High — exact stdlib names; all three categories have well-defined NULL-on-failure semantics | No — fixed stdlib names included in generated taint sources automatically |
 | 5b | `realloc` overwrites original pointer | `buf = realloc(buf, n);` | `realloc-overwrites-original-pointer` | — | OSS only (unchanged) | High — structural pattern `$PTR = realloc($PTR, ...)` is always a bug | No |
 | 6 | Struct member access on unchecked pointer | `node = find_node(l, k); node->value = 42;` | `unchecked-struct-member-access` | `null-pointer-unchecked-taint` | Both → **Generated Both** | Medium — heuristic regex on function names | **Replaces** heuristic rule — drop `unchecked-struct-member-access` when using toolchain |
-| 7 | `strstr`/`strchr` result not checked | `char *p = strstr(buf, "key="); p += 4;` | `unchecked-string-search-result` | `null-pointer-unchecked-taint` | Both → **Both (stdlib in generated taint sources)** | High — exact stdlib names; arithmetic on result without check is always a crash | No — fixed stdlib names included in generated taint sources automatically |
-| 8 | `getenv`/`fopen` result not checked | `char *h = getenv("HOME"); strlen(h);` | `unchecked-system-function-result` | `null-pointer-unchecked-taint` | Both → **Both (stdlib in generated taint sources)** | High — exact stdlib names; NULL return is documented and common | No — fixed stdlib names included in generated taint sources automatically |
 | 9 | Conditional NULL (only set in some paths) | `char *r = NULL; if (c) r = alloc(); use(r);` | — | `null-pointer-unchecked-taint` | Pro only → **Generated Pro (improved sources)** | Medium — taint may flag cases where all real callers always satisfy the condition | No — dataflow, not function-name driven; benefits from improved taint sources |
 | 10 | NULL propagation across function calls | `char *cn = get_cn(cert); printf("%s", cn);` | — | `null-pointer-unchecked-taint` | Pro only → **Generated Pro (improved sources)** | Medium — inter-procedural taint may over-approximate through wrapper chains | No — dataflow, not function-name driven; benefits from improved taint sources |
 | 11a | C++ unchecked `dynamic_cast` | `Derived *d = dynamic_cast<Derived*>(b); d->method();` | `unchecked-dynamic-cast` | — | OSS only (unchanged) | High — cast failure is well-defined; missing nullptr check is always unsafe | No — language construct, not a named function |
@@ -1014,9 +962,6 @@ Re-run the toolchain whenever new functions are added or existing ones are modif
 | 12 | C++ iterator `find()` result not checked | `auto it = m.find(k); return it->second;` | `unchecked-map-find-result` | `unchecked-map-find-taint` | Both (unchanged) | High — dereferencing `end()` is always UB | No — fixed stdlib names |
 | 13 | Uninitialized out-parameter (CWE-457) | `int *out; get_val(&out); printf("%d", *out);` | — | `uninitialized-out-param-taint` | Pro only (partial — return-code sanitizer required, unchanged) | Low — partial coverage; return-code check sanitizer may miss non-standard error conventions | No — dataflow, not function-name driven |
 | 14 | `strtok`/`strtok_r`/`strsep` exhaustion | `while(1) { use(tok); tok = strtok(NULL, ","); }` | `strtok-loop-without-null-check` | `strtok-result-null-check-taint` | Both (unchanged) | High (OSS) / Medium (taint — may flag intentional sentinel loops) | No — fixed stdlib names |
-
-
-
 
 
 > **OSS-only patterns** — covered by OSS rule but no Pro taint rule is possible:
