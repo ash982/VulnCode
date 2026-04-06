@@ -855,6 +855,8 @@ The two failure paths and their CWEs:
 ---
 
 ## Toolchain: Building a Project-Specific Allowlist
+In the Toolchain approach, "X509_NAME_oneline" is an OpenSSL-specific function name that leaked in from the doc's motivating example. It has no place in a project-agnostic generated rule — it belongs in pattern-sources(as a nullable function) if discovered by the toolchain, not hardcoded in pattern-sinks.  
+   
 In the rule "id: discarded-pointer-function-return",  
 ```regex: (?i).*(get|alloc|new|create|open|dup|strdup|find|lookup|load|read|parse|oneline|print_ex).*```                                                         
 
