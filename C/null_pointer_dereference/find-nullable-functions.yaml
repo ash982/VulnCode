@@ -1,0 +1,24 @@
+rules:
+  # Step 1: Find all pointer-returning functions that have at least one "return NULL" path.
+  # Run this rule first to build a project-specific nullable function allowlist.
+  # Usage: semgrep --config find_nullable_functions.yaml --json <src_dir> | python build_nullable_allowlist.py
+  - id: find-nullable-functions
+    message: "NULLABLE_FUNC: $FUNC can return NULL or nullptr — callers must check the return value"
+    severity: INFO
+    languages: [c, cpp]
+    metadata:
+      purpose: allowlist-builder
+      cwe: CWE-476
+    pattern-either:
+      - pattern: |
+          $RETTYPE *$FUNC(...) {
+            ...
+            return nullptr;
+            ...
+          }  
+      - pattern: |
+          $RETTYPE *$FUNC(...) {
+            ...
+            return NULL;
+            ...
+          }
