@@ -1,0 +1,19 @@
+rules:
+  # Step 2: Find pointer-returning functions annotated as _Nullable (already declared safe to skip).
+  # These are excluded from the generated rules automatically.
+  - id: find-nonnull-annotated-functions
+    message: "NONNULL_FUNC: $FUNC is annotated returns_nonnull — callers do not need to NULL-check"
+    severity: INFO
+    languages: [c, cpp]
+    metadata:
+      purpose: exclusion-builder
+      cwe: CWE-476
+    patterns:
+      - pattern: |
+          $RETTYPE *$FUNC(...) __attribute__((returns_nonnull));
+      - pattern-not: |
+          $RETTYPE *$FUNC(...) __attribute__((returns_nonnull)) {
+            ...
+            return NULL;
+            ...
+          }
