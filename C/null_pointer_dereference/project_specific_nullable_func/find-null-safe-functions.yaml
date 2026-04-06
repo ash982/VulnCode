@@ -1,0 +1,29 @@
+rules:
+  # Finds pointer-accepting functions that check the parameter for NULL before use.
+  # These are safe to call with a NULL argument — excluded from $OUTER in
+  # generated-unchecked-chained-nullable-call (Rule 4).
+  # Usage: run alongside find_nullable_functions.yaml in the same semgrep invocation.
+  #   semgrep --config find-nullable-functions.yaml \
+  #           --config find-null-safe-functions.yaml \
+  #           --config find-nonnull-annotated-functions.yaml \
+  #           --json <src_dir> | python build_nullable_allowlist.py
+  - id: find-null-safe-functions
+    message: "NULL_SAFE_FUNC: $FUNC checks pointer parameter `$PTR` for NULL — safe to receive NULL as argument"
+    severity: INFO
+    languages: [c, cpp]
+    metadata:
+      purpose: outer-exclusion-builder
+      cwe: CWE-476
+    pattern-either:
+      - pattern: |
+          $RET $FUNC(..., $TYPE *$PTR, ...) {
+            ...
+            if ($PTR == NULL) { ... }
+            ...
+          }
+      - pattern: |
+          $RET $FUNC(..., $TYPE *$PTR, ...) {
+            ...
+            if (!$PTR) { ... }
+            ...
+          }
