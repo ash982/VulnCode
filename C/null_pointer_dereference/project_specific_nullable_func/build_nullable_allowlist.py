@@ -123,6 +123,9 @@ def extract_functions(results: dict, min_occurrences: int) -> tuple[set[str], se
         rule_id = finding.get("check_id", "").split(".")[-1]  # strip rule file prefix
         metavars = finding.get("extra", {}).get("metavars", {})
         func_name = metavars.get(f"${METAVAR_FUNC}", {}).get("abstract_content", "")
+        # Semgrep represents "Class::Method" as "Class Method" in abstract_content — restore "::"
+        if " " in func_name:
+            func_name = func_name.replace(" ", "::", 1)
 
         if not func_name:
             continue
@@ -164,10 +167,15 @@ def generate_rules(nullable_funcs: set[str], nonnull_funcs: set[str], null_safe_
     stdlib_list_comment = ", ".join(sorted(STDLIB_NULLABLE_FUNCS))
     third_party_list_comment = ", ".join(sorted(KNOWN_THIRD_PARTY_NULLABLE))
 
-    # Rule 4: build $OUTER exclusion regex from null-safe functions if any were discovered
+    # Rule 4: build $OUTER exclusion regex from null-safe functions if any were discovered.
     # "Flag when a nullable inner result goes directly into an outer function... unless that outer function is known to be null-safe."    
+    # $OUTER matches the unqualified callee name at a call site, so strip any "Class::" prefix.
+    # One side effect to be aware of: if two different classes have a method with the same name but only one is null-safe, stripping the class prefix will incorrectly suppress Rule 4 for 
+    # the other class too. For example, GetHttpResponse appears on four classes — if any one of them is null-safe, all four get excluded. That's a conservative trade-off (fewer false
+    # positives, possible false negatives)
     if null_safe_funcs:
-        null_safe_list = "|".join(sorted(null_safe_funcs))
+        null_safe_unqualified = {name.split("::")[-1] for name in null_safe_funcs}
+        null_safe_list = "|".join(sorted(null_safe_unqualified))
         outer_constraint = f"""\
       - metavariable-regex:
           metavariable: $OUTER
