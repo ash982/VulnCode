@@ -879,17 +879,17 @@ Rather than relying on heuristic regex patterns for function names, use the prov
 ```
 Step 1: Discover nullable, non-null, and null-safe functions in one pass
 ─────────────────────────────────────────────────────────────────────
-semgrep --config panw.c.general.find-nullable-functions.yaml \
-        --config panw.c.general.find-nonnull-annotated-functions.yaml \
-        --config panw.c.general.find-null-safe-functions.yaml \
+semgrep --config find-nullable-functions.yaml \
+        --config find-nonnull-annotated-functions.yaml \
+        --config find-null-safe-functions.yaml \
         --json <src_dir> \
     | python build_nullable_allowlist.py --output null_ptr_generated.yaml
 
 Step 2: Review the discovered lists
 ─────────────────────────────────────────────────────────────────────
-semgrep --config panw.c.general.find-nullable-functions.yaml \
-        --config panw.c.general.find-nonnull-annotated-functions.yaml \
-        --config panw.c.general.find-null-safe-functions.yaml \
+semgrep --config find-nullable-functions.yaml \
+        --config find-nonnull-annotated-functions.yaml \
+        --config find-null-safe-functions.yaml \
         --json <src_dir> \
     | python build_nullable_allowlist.py --list-only
 
