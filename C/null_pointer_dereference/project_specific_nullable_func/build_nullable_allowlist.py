@@ -14,7 +14,7 @@ Step 2: Generates a precise semgrep rules file (null_ptr_generated.yaml) that
           Rule 3 — Struct member access unchecked   (replaces: unchecked-struct-member-access)
           Rule 4 — Chained call, inner unchecked    (replaces: unchecked-chained-call-result)
                    $OUTER is constrained to exclude null-safe functions discovered by
-                   find-null-safe-functions (panw.c.general.find-null-safe-functions.yaml)
+                   find-null-safe-functions (find-null-safe-functions.yaml)
           Rule 5 — Taint: NULL propagation          (replaces: null-pointer-unchecked-taint)
 
         Rules 1–4 fully replace their heuristic counterparts. Do NOT run both.
@@ -22,9 +22,9 @@ Step 2: Generates a precise semgrep rules file (null_ptr_generated.yaml) that
 
 Usage:
     # Run all discovery rules and pipe combined output into this script
-    semgrep --config panw.c.general.find-nullable-functions.yaml \
-            --config panw.c.general.find-null-safe-functions.yaml \
-            --config panw.c.general.find-nonnull-annotated-functions.yaml \
+    semgrep --config find-nullable-functions.yaml \
+            --config find-null-safe-functions.yaml \
+            --config find-nonnull-annotated-functions.yaml \
             --json <src_dir> \
         | python build_nullable_allowlist.py [--output null_ptr_generated.yaml]
 
