@@ -165,6 +165,7 @@ def generate_rules(nullable_funcs: set[str], nonnull_funcs: set[str], null_safe_
     third_party_list_comment = ", ".join(sorted(KNOWN_THIRD_PARTY_NULLABLE))
 
     # Rule 4: build $OUTER exclusion regex from null-safe functions if any were discovered
+    # "Flag when a nullable inner result goes directly into an outer function... unless that outer function is known to be null-safe."    
     if null_safe_funcs:
         null_safe_list = "|".join(sorted(null_safe_funcs))
         outer_constraint = f"""\
