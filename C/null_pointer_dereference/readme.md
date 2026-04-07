@@ -1036,8 +1036,38 @@ These functions are statically seeded and merged into:
 
 Add new entries whenever a third-party library function is found to return NULL and appears in call sites without a check. Include a comment with the library name and the NULL condition.
 
----
 
+**Assue all functions are nullable is the most conservative possible assumption — zero false negatives for third-party functions. But the false positive cost is severe.**  
+The problem: you can't distinguish third-party from project at match time.  
+Semgrep sees `$FUNC(...)` — it has no concept of which translation unit or library `$FUNC` belongs to. To implement "all third-party functions are nullable" you'd need a regex that matches every function name except the project-discovered ones. That regex would also match project functions not yet in the allowlist, internal helpers, etc.                                                                
+
+False positive examples that would fire:
+
+```c
+// These never return NULL — they abort/exit on failure
+SSL_CTX *ctx = SSL_CTX_new(TLS_method());    // fires — but libssl aborts on OOM
+BIGNUM *bn = BN_new();                        // fires — but caller checks separately
+
+// These return non-pointer types cast to pointer
+const char *err = ERR_reason_error_string(e); // fires — but well-defined for known codes
+
+// Project-internal nonnull functions not yet scanned
+Config *cfg = get_global_config();            // fires — but annotated returns_nonnull
+```
+
+The real trade-off:
+
+| Approach | False negatives | False positives  | Maintenance |
+|---|---|---|---|                                            
+| KNOWN_THIRD_PARTY_NULLABLE (current) | Misses unknown third-party functions | None | Add entries manually |                     
+| Assume all third-party nullable | None | Very high — many third-party functions never return NULL | Must maintain an exclusion list instead | 
+|Call-site inference | Misses unchecked call sites | Low | None |                       
+
+"Assume all nullable" shifts the problem — instead of maintaining an inclusion list of nullable functions, you'd be maintaining an exclusion list of nonnull functions, which is larger and harder to keep complete.    
+
+For security tooling specifically, high false positive rates cause alert fatigue and erode trust in the rules — teams start ignoring findings wholesale. KNOWN_THIRD_PARTY_NULLABLE keeps false positives at zero at the cost of bounded manual effort.  
+
+---
 
 ### Fitting trade-offs across all patterns
 
