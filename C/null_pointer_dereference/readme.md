@@ -637,6 +637,14 @@ rules:
 ```
 
 
+| Pattern | $FUNC regex | Sanitizers |  Sink |
+|---|---|---|---|                                          
+|2 | `heuristic get│alloc│...`     | same 5     | $SINK($PTR, ...)         |
+|5 | `exact ^(malloc│calloc│...)$` | same 5     | $USE($PTR, ...)          |
+|6 | `heuristic get│find│...`      | same 3     | $PTR->$FIELD ← different |
+|7 | `exact ^(strstr│strchr│...)$` | same 5     | $USE($PTR, ...)          |
+|8 | `exact ^(getenv│fopen│...)$`  | same 5     | $USE($PTR, ...)          |                                                                                                                                   
+
 ---
 
 ### Taint Rules (semgrep Pro)
@@ -774,8 +782,14 @@ rules:
       - pattern: $X->$FIELD
       - pattern: "$X[...]"
 ```
-
-
+                                                                                                                                                                                                                     
+| Rule | Source | Sanitizer | Sink | Language |
+|---|---|---|---|---|
+| null-pointer-unchecked-taint | function call (heuristic regex) | NULL checks | function call (heuristic regex) | c, cpp |
+| uninitialized-out-param-taint | `$TYPE **$OUT` double-pointer param | return-code check + NULL checks | *$X, $X->$FIELD | c, cpp |
+| pointer-param-indirect-deref-taint | `$TYPE *$STR` single pointer param | NULL checks only | *$X, $X[...] | c, cpp |
+| unchecked-map-find-taint | `$MAP.find(...)` | `end()` check | $X->$FIELD, *$X | cpp only |                                                
+| strtok-result-null-check-taint | `strtok│strtok_r│strsep` exact | NULL checks | $FUNC($X,...), *$X, $X->$FIELD, $X[...] | c, cpp |                                                
 
 ---
 
