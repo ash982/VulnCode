@@ -662,6 +662,7 @@ rules:
     languages: [c, cpp]
     metadata:
       cwe: [CWE-476, CWE-690]
+      interfile: true   # required — patterns 2 (inter) and 10 track NULL across file boundaries
     pattern-sources:
       - patterns:
           - pattern: $FUNC(...)
@@ -691,6 +692,7 @@ rules:
     languages: [c, cpp]
     metadata:
       cwe: [CWE-457, CWE-476]
+      interfile: true   # required — callee (source) and caller (sink) are commonly in separate files
     pattern-sources:
       - pattern: |
           $RET $CALLEE(..., $TYPE **$OUT, ...) {
@@ -722,6 +724,7 @@ rules:
     languages: [c, cpp]
     metadata:
       cwe: CWE-476
+      interfile: false  # not needed — source (parameter) and sink (dereference) are within the same function body
     pattern-sources:
       - pattern: |
           $RET $FUNC(... , $TYPE *$STR, ...) {
@@ -745,6 +748,7 @@ rules:
     languages: [cpp]
     metadata:
       cwe: CWE-476
+      interfile: false  # optional — most map::find uses are intra-file; enable if cross-file iterator passing is observed
     pattern-sources:
       - pattern: $MAP.find(...)
     pattern-sanitizers:
@@ -765,6 +769,7 @@ rules:
     languages: [c, cpp]
     metadata:
       cwe: [CWE-476, CWE-690]
+      interfile: false  # optional — most strtok token usage is intra-file; enable if tokens are passed across file boundaries
     pattern-sources:
       - patterns:
           - pattern: $FUNC(...)
@@ -782,6 +787,7 @@ rules:
       - pattern: $X->$FIELD
       - pattern: "$X[...]"
 ```
+
                                                                                                                                                                                                                      
 | Rule | Source | Sanitizer | Sink | Language |
 |---|---|---|---|---|
@@ -789,7 +795,15 @@ rules:
 | uninitialized-out-param-taint | `$TYPE **$OUT` double-pointer param | return-code check + NULL checks | *$X, $X->$FIELD | c, cpp |
 | pointer-param-indirect-deref-taint | `$TYPE *$STR` single pointer param | NULL checks only | *$X, $X[...] | c, cpp |
 | unchecked-map-find-taint | `$MAP.find(...)` | `end()` check | $X->$FIELD, *$X | cpp only |                                                
-| strtok-result-null-check-taint | `strtok│strtok_r│strsep` exact | NULL checks | $FUNC($X,...), *$X, $X->$FIELD, $X[...] | c, cpp |                                                
+| strtok-result-null-check-taint | `strtok│strtok_r│strsep` exact | NULL checks | $FUNC($X,...), *$X, $X->$FIELD, $X[...] | c, cpp |                              
+
+| Rule | interfile | Rationale | 
+|---|---|---|                                                                                          
+| null-pointer-unchecked-taint       | true      | Required — patterns 2/10 track NULL across file boundaries |
+| uninitialized-out-param-taint      | true      | Required — callee and caller commonly in separate files    |
+| pointer-param-indirect-deref-taint | false     | Not needed — source and sink within the same function body |
+| unchecked-map-find-taint           | false     | Optional — enable only if iterators are passed cross-file  |
+| strtok-result-null-check-taint     | false     | Optional — enable only if tokens are passed cross-file     |                                                  
 
 ---
 
