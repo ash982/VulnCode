@@ -155,12 +155,16 @@ def generate_rules(nullable_funcs: set[str], nonnull_funcs: set[str], null_safe_
     if not nullable_funcs and not KNOWN_THIRD_PARTY_NULLABLE:
         sys.exit("No nullable functions found. Nothing to generate.")
 
+    # All patterns match call sites where $FUNC/$INNER/$OUTER is an unqualified name.
+    # Strip "Class::" prefix from definition-discovered names before building regexes.
+    nullable_unqualified = {name.split("::")[-1] for name in nullable_funcs}
+
     # Rules 1–4 ($FUNC/$INNER): project + known third-party nullable
     # Catches chained calls like X509_NAME_oneline(X509_get_issuer_name(...))
-    inner_funcs = nullable_funcs | KNOWN_THIRD_PARTY_NULLABLE
+    inner_funcs = nullable_unqualified | KNOWN_THIRD_PARTY_NULLABLE
     exact_regex = build_exact_regex(inner_funcs)
     # Rule 5: project + stdlib + known third-party nullable
-    taint_funcs = nullable_funcs | STDLIB_NULLABLE_FUNCS | KNOWN_THIRD_PARTY_NULLABLE
+    taint_funcs = nullable_unqualified | STDLIB_NULLABLE_FUNCS | KNOWN_THIRD_PARTY_NULLABLE
     taint_regex = build_exact_regex(taint_funcs)
 
     func_list_comment = "\n    #   - ".join(sorted(nullable_funcs)) or "(none discovered)"
@@ -396,7 +400,7 @@ def main() -> None:
     print(f"[+] Generated rules written to: {args.output}", file=sys.stderr)
     print(f"[+] Rules 1-4 replace heuristic OSS rules — do not run both.", file=sys.stderr)
     print(f"[+] Rule 5 replaces null-pointer-unchecked-taint — do not run both.", file=sys.stderr)
-    print(f"[+] Run: semgrep --config {args.output} <src_dir>", file=sys.stderr)
+    print(f"[+] Run: semgrep --pro --config {args.output} <src_dir>", file=sys.stderr)
 
 
 if __name__ == "__main__":
