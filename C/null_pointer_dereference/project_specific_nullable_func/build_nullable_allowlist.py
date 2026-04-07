@@ -299,6 +299,8 @@ rules:
       The source function can return NULL; using it unchecked causes undefined behavior.
     severity: ERROR
     languages: [c, cpp]
+    options:
+      interfile: true   # required — tracks NULL across file boundaries (patterns 2 inter, 10)
     metadata:
       cwe: [CWE-476, CWE-690]
       generated: true
