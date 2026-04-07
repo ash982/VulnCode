@@ -944,6 +944,7 @@ char *get_version(void) __attribute__((returns_nonnull));
 
 // Re-run Step 1 — annotated functions are automatically excluded from sources
 // and null-safe functions are automatically excluded from $OUTER in Rule 4
+// If $OUTER is a function known to be null-safe — meaning it handles a NULL argument gracefully (checks internally, doesn't dereference, etc.) — then passing $INNER()'s potentially-NULL result into it is not actually a bug. The crash only happens if $OUTER blindly dereferences the pointer.
 ```
 
 
@@ -963,11 +964,11 @@ Four rules are generated automatically, replacing their heuristic counterparts:
 
 | Generated rule (in `null_ptr_generated.yaml`) | Heuristic rule to drop |
 |---|---|
-| `generated-discarded-nullable-return` | `discarded-pointer-function-return` |
-| `generated-unchecked-nullable-pointer-use` | `unchecked-pointer-before-use` |
-| `generated-unchecked-struct-member-access` | `unchecked-struct-member-access` |
-| `generated-unchecked-chained-nullable-call` | `unchecked-chained-call-result` |
-| `generated-null-pointer-unchecked-taint` | `null-pointer-unchecked-taint` |
+| rule 1: `generated-discarded-nullable-return` | `discarded-pointer-function-return` |
+| rule 2: `generated-unchecked-nullable-pointer-use` | `unchecked-pointer-before-use` |
+| rule 3: `generated-unchecked-struct-member-access` | `unchecked-struct-member-access` |
+| rule 4: `generated-unchecked-chained-nullable-call` | `unchecked-chained-call-result` |
+| rule 5: `generated-null-pointer-unchecked-taint` | `null-pointer-unchecked-taint` |
 
 The generated taint rule (Rule 5) combines project-specific nullable functions discovered by the toolchain with a fixed set of stdlib nullable functions (`malloc`, `calloc`, `strdup`, `getenv`, `fopen`, `strstr`, `strchr`, etc.) and a seeded set of known third-party nullable functions, replacing the heuristic regex in `null-pointer-unchecked-taint` with an exact source list.
 
