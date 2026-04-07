@@ -660,9 +660,10 @@ rules:
       Value from `$SOURCE` flows into `$SINK` without a NULL check.
     severity: ERROR
     languages: [c, cpp]
+    options:
+      interfile: true   # required — patterns 2 (inter) and 10 track NULL across file boundaries
     metadata:
       cwe: [CWE-476, CWE-690]
-      interfile: true   # required — patterns 2 (inter) and 10 track NULL across file boundaries
     pattern-sources:
       - patterns:
           - pattern: $FUNC(...)
@@ -690,9 +691,10 @@ rules:
       Using `*$OUT` without first checking the return code causes undefined behavior.
     severity: ERROR
     languages: [c, cpp]
+    options:
+      interfile: true   # required — callee (source) and caller (sink) are commonly in separate files
     metadata:
       cwe: [CWE-457, CWE-476]
-      interfile: true   # required — callee (source) and caller (sink) are commonly in separate files
     pattern-sources:
       - pattern: |
           $RET $CALLEE(..., $TYPE **$OUT, ...) {
@@ -722,9 +724,9 @@ rules:
       Pointer parameter `$STR` is dereferenced (possibly indirectly) without a NULL check.
     severity: ERROR
     languages: [c, cpp]
+    # options.interfile not set — source (parameter) and sink (dereference) are within the same function body
     metadata:
       cwe: CWE-476
-      interfile: false  # not needed — source (parameter) and sink (dereference) are within the same function body
     pattern-sources:
       - pattern: |
           $RET $FUNC(... , $TYPE *$STR, ...) {
@@ -746,9 +748,9 @@ rules:
       Dereferencing `end()` is undefined behavior.
     severity: ERROR
     languages: [cpp]
+    # options.interfile not set — most map::find uses are intra-file; enable if cross-file iterator passing is observed
     metadata:
       cwe: CWE-476
-      interfile: false  # optional — most map::find uses are intra-file; enable if cross-file iterator passing is observed
     pattern-sources:
       - pattern: $MAP.find(...)
     pattern-sanitizers:
@@ -767,9 +769,9 @@ rules:
       When tokens are exhausted these functions return NULL; using the result causes a crash.
     severity: ERROR
     languages: [c, cpp]
+    # options.interfile not set — most strtok token usage is intra-file; enable if tokens are passed across file boundaries
     metadata:
       cwe: [CWE-476, CWE-690]
-      interfile: false  # optional — most strtok token usage is intra-file; enable if tokens are passed across file boundaries
     pattern-sources:
       - patterns:
           - pattern: $FUNC(...)
@@ -786,9 +788,7 @@ rules:
       - pattern: "*$X"
       - pattern: $X->$FIELD
       - pattern: "$X[...]"
-```
-
-                                                                                                                                                                                                                     
+```                                                                                                                                                                                                                  
 | Rule | Source | Sanitizer | Sink | Language |
 |---|---|---|---|---|
 | null-pointer-unchecked-taint | function call (heuristic regex) | NULL checks | function call (heuristic regex) | c, cpp |
