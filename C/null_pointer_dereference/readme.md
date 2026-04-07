@@ -979,7 +979,41 @@ The generated taint rule (Rule 5) combines project-specific nullable functions d
 
 **Example:** `X509_NAME_oneline(X509_get_issuer_name(ccert), buf, 1024)` — `X509_get_issuer_name` returns `NULL` if the certificate has no issuer, but it is an OpenSSL function. The toolchain alone cannot detect this as a chained-call hazard.
 
-**Solution — `KNOWN_THIRD_PARTY_NULLABLE` in `build_nullable_allowlist.py`:**
+The OpenSSL header provides no machine-readable nullability contract:
+
+```c
+// openssl/x509.h — bare pointer return, no annotation
+X509_NAME *X509_get_issuer_name(const X509 *x);
+```
+
+There is no `_Nullable`, no SAL annotation, no `__attribute__` — nullability is documented in prose only. This is the norm for most C libraries.
+
+#### Why automated discovery approaches fall short
+
+**Header annotation scanning** — looks for `_Nullable` / `_Ret_maybenull_` / `__nullable` in `.h` files. Does not work for OpenSSL-style headers that carry no annotations.
+
+**Call-site inference** — looks for existing NULL checks after a function call in the scanned codebase, e.g.:
+
+```c
+X509_NAME *name = X509_get_issuer_name(cert);
+if (name == NULL) { ... }   // inferred: function is nullable
+```
+
+This only works when **other callers in the same codebase already check** the return value. If the codebase consistently skips the check — which is exactly the bug being searched for — the rule discovers nothing. In the example above, the only call site is the vulnerable chained call with no assignment and no check.
+
+#### Discovery approach coverage
+
+| Scenario | `find_nullable_functions` | Header scan | Call-site inference | `KNOWN_THIRD_PARTY_NULLABLE` |
+|---|---|---|---|---|
+| Source available | ✅ | — | — | — |
+| Header annotated (`_Nullable`) | — | ✅ | — | — |
+| Some callers check, some don't | — | — | ✅ | — |
+| No caller checks (all vulnerable) | — | — | ❌ | ✅ |
+| Unannotated header, no checked callers | — | ❌ | ❌ | ✅ |
+
+For unannotated third-party C libraries where the codebase has no NULL-checking call sites, `KNOWN_THIRD_PARTY_NULLABLE` is the only viable option. The manual cost is bounded — one entry per library function, not per call site.
+
+#### Solution — `KNOWN_THIRD_PARTY_NULLABLE`
 
 ```python
 KNOWN_THIRD_PARTY_NULLABLE: set[str] = {
@@ -997,13 +1031,12 @@ KNOWN_THIRD_PARTY_NULLABLE: set[str] = {
 ```
 
 These functions are statically seeded and merged into:
-- **Rule 4 `$INNER` regex** — catches chained calls where a third-party nullable return is passed directly to another function without a NULL check
+- **Rules 1–4 `$FUNC`/`$INNER` regex** — catches discarded, unchecked-assigned, struct-member, and chained-call patterns involving third-party nullable returns
 - **Rule 5 taint sources** — tracks NULL propagation from third-party returns through the codebase
 
-Add new entries to `KNOWN_THIRD_PARTY_NULLABLE` whenever a third-party library function is found to return NULL and is used in chained calls or assigned without a check.
+Add new entries whenever a third-party library function is found to return NULL and appears in call sites without a check. Include a comment with the library name and the NULL condition.
 
-
-
+---
 
 
 ### Fitting trade-offs across all patterns
