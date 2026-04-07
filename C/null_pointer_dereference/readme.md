@@ -1005,8 +1005,8 @@ This only works when **other callers in the same codebase already check** the re
 
 | Scenario | `find_nullable_functions` | Header scan | Call-site inference | `KNOWN_THIRD_PARTY_NULLABLE` |
 |---|---|---|---|---|
-| Source available | ✅ | — | — | — |
-| Header annotated (`_Nullable`) | — | ✅ | — | — |
+| 3rd party source code available (.c, .cpp) | ✅ | — | — | — |
+| Header annotated (`_Nullable`) in third-party header files (.h) | — | ✅ | — | — |
 | Some callers check, some don't | — | — | ✅ | — |
 | No caller checks (all vulnerable) | — | — | ❌ | ✅ |
 | Unannotated header, no checked callers | — | ❌ | ❌ | ✅ |
