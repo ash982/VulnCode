@@ -788,7 +788,46 @@ rules:
       - pattern: "*$X"
       - pattern: $X->$FIELD
       - pattern: "$X[...]"
-```                                                                                                                                                                                                                  
+```
+
+**Can I drop oss mode rule of a pattern if its pro mode rule exists?**   
+
+Not fully — it depends on the pattern. The key issue is sink breadth:
+
+  OSS rules use unconstrained sinks — any function call or dereference:
+  ```
+  $SINK($PTR, ...)   # matches any function
+  $PTR->$FIELD       # matches any member access
+  ```
+
+  Pro taint rules constrain sinks to a specific regex:
+  ```
+  pattern-sinks:
+    - patterns:
+        - pattern: $FUNC($X, ...)
+        - metavariable-regex:
+            metavariable: $FUNC
+            regex: (?i).*(print|strstr|strcmp|strlen|memcpy|...).*
+  ```
+
+So if the pointer flows into a function not in the sink regex, taint misses it but OSS catches it.
+| Pattern | Pro subsumes OSS? | Reason | 
+|---|---|---|
+| 1       | No                | Taint cannot track discarded return values                                                         |
+| 2       | No                | Taint sinks are constrained; OSS catches any $SINK($PTR, ...)                                      |
+| 3       | No                | Taint cannot track ephemeral inner call value                                                      |
+| 4       | Yes               | Taint source is the parameter; sink is *$X / $X[...] — covers both direct and indirect dereference |
+| 5/7/8   | No                | Taint sinks constrained; OSS catches any use of the pointer                                        |
+| 5b      | No                | Structural pattern — no data flow to taint                                                         |
+| 6       | No                | Taint sinks don't include $PTR->$FIELD                                                             |
+| 11a/11b | No                | Language constructs — no taintable source                                                          |
+| 12      | Yes               | Taint source=find(), sink=$X->$FIELD — covers intra-file and cross-file                            |
+| 14      | Partial           | Taint covers more cases; OSS while(1) pattern catches structurally without sink constraint         |
+
+Practical conclusion: for patterns 4 and 12, you could drop the OSS rule and rely solely on Pro taint. For all others, OSS and Pro taint are complementary — dropping OSS would lose findings where the pointer flows to unconstrained sinks.  
+  
+---    
+
 | Rule | Source | Sanitizer | Sink | Language |
 |---|---|---|---|---|
 | null-pointer-unchecked-taint | function call (heuristic regex) | NULL checks | function call (heuristic regex) | c, cpp |
@@ -796,6 +835,7 @@ rules:
 | pointer-param-indirect-deref-taint | `$TYPE *$STR` single pointer param | NULL checks only | *$X, $X[...] | c, cpp |
 | unchecked-map-find-taint | `$MAP.find(...)` | `end()` check | $X->$FIELD, *$X | cpp only |                                                
 | strtok-result-null-check-taint | `strtok│strtok_r│strsep` exact | NULL checks | $FUNC($X,...), *$X, $X->$FIELD, $X[...] | c, cpp |                              
+---
 
 | Rule | interfile | Rationale | 
 |---|---|---|                                                                                          
