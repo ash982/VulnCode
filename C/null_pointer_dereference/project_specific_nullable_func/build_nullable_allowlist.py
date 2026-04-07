@@ -14,7 +14,7 @@ Step 2: Generates a precise semgrep rules file (null_ptr_generated.yaml) that
           Rule 3 — Struct member access unchecked   (replaces: unchecked-struct-member-access)
           Rule 4 — Chained call, inner unchecked    (replaces: unchecked-chained-call-result)
                    $OUTER is constrained to exclude null-safe functions discovered by
-                   find-null-safe-functions (find-null-safe-functions.yaml)
+                   find-null-safe-functions (panw.c.general.find-null-safe-functions.yaml)
           Rule 5 — Taint: NULL propagation          (replaces: null-pointer-unchecked-taint)
 
         Rules 1–4 fully replace their heuristic counterparts. Do NOT run both.
@@ -22,9 +22,9 @@ Step 2: Generates a precise semgrep rules file (null_ptr_generated.yaml) that
 
 Usage:
     # Run all discovery rules and pipe combined output into this script
-    semgrep --config find-nullable-functions.yaml \
-            --config find-null-safe-functions.yaml \
-            --config find-nonnull-annotated-functions.yaml \
+    semgrep --config panw.c.general.find-nullable-functions.yaml \
+            --config panw.c.general.find-null-safe-functions.yaml \
+            --config panw.c.general.find-nonnull-annotated-functions.yaml \
             --json <src_dir> \
         | python build_nullable_allowlist.py [--output null_ptr_generated.yaml]
 
@@ -55,7 +55,7 @@ NULL_SAFE_RULE_IDS = {
 
 METAVAR_FUNC = "FUNC"
 
-# ── Fixed stdlib functions always included as taint sources ───────────────────
+# ── Fixed stdlib functions always included as taint sources (Rule 5) ──────────
 # These return NULL on failure but are not discoverable via find_nullable_functions
 # (source not in the scanned codebase). Combined with project-specific functions
 # in Rule 5 to replace the heuristic regex in null-pointer-unchecked-taint.
@@ -63,6 +63,24 @@ STDLIB_NULLABLE_FUNCS: set[str] = {
     "malloc", "calloc", "strdup", "strndup",
     "getenv", "fopen", "fdopen", "freopen", "opendir", "dlopen", "popen",
     "strstr", "strchr", "strrchr", "strpbrk", "memmem",
+}
+
+# ── Known third-party nullable functions (Rules 4 and 5) ──────────────────────
+# Functions from third-party libraries whose source is not available for scanning
+# by find_nullable_functions. Add entries here when a library function is known
+# to return NULL on failure and is used in chained calls or assigned without check.
+# Format: "function_name",  # library — return-NULL condition
+KNOWN_THIRD_PARTY_NULLABLE: set[str] = {
+    # OpenSSL — X509
+    "X509_get_issuer_name",       # OpenSSL — returns NULL if cert has no issuer
+    "X509_get_subject_name",      # OpenSSL — returns NULL if cert has no subject
+    "X509_get_pubkey",            # OpenSSL — returns NULL on failure
+    # OpenSSL — BIO
+    "BIO_new",                    # OpenSSL — returns NULL on allocation failure
+    "BIO_new_mem_buf",            # OpenSSL — returns NULL on failure
+    # OpenSSL — EVP
+    "EVP_get_digestbyname",       # OpenSSL — returns NULL if digest not found
+    "EVP_MD_CTX_new",             # OpenSSL — returns NULL on allocation failure
 }
 
 
@@ -131,16 +149,20 @@ def build_exact_regex(func_names: set[str]) -> str:
 
 def generate_rules(nullable_funcs: set[str], nonnull_funcs: set[str], null_safe_funcs: set[str]) -> str:
     """Generate a semgrep YAML rules file with exact function allowlist."""
-    if not nullable_funcs:
+    if not nullable_funcs and not KNOWN_THIRD_PARTY_NULLABLE:
         sys.exit("No nullable functions found. Nothing to generate.")
 
-    exact_regex = build_exact_regex(nullable_funcs)
-    # Rule 5 combines project-specific functions with fixed stdlib nullable functions
-    taint_funcs = nullable_funcs | STDLIB_NULLABLE_FUNCS
+    # Rules 1–4 ($FUNC/$INNER): project + known third-party nullable
+    # Catches chained calls like X509_NAME_oneline(X509_get_issuer_name(...))
+    inner_funcs = nullable_funcs | KNOWN_THIRD_PARTY_NULLABLE
+    exact_regex = build_exact_regex(inner_funcs)
+    # Rule 5: project + stdlib + known third-party nullable
+    taint_funcs = nullable_funcs | STDLIB_NULLABLE_FUNCS | KNOWN_THIRD_PARTY_NULLABLE
     taint_regex = build_exact_regex(taint_funcs)
 
-    func_list_comment = "\n    #   - ".join(sorted(nullable_funcs))
+    func_list_comment = "\n    #   - ".join(sorted(nullable_funcs)) or "(none discovered)"
     stdlib_list_comment = ", ".join(sorted(STDLIB_NULLABLE_FUNCS))
+    third_party_list_comment = ", ".join(sorted(KNOWN_THIRD_PARTY_NULLABLE))
 
     # Rule 4: build $OUTER exclusion regex from null-safe functions if any were discovered
     if null_safe_funcs:
@@ -166,6 +188,9 @@ def generate_rules(nullable_funcs: set[str], nonnull_funcs: set[str], null_safe_
 #
 # Fixed stdlib nullable functions (always included in Rule 5 taint sources):
 #   {stdlib_list_comment}
+#
+# Known third-party nullable functions (included in Rule 4 $INNER + Rule 5 taint sources):
+#   {third_party_list_comment}
 #
 # {null_safe_comment}
 #
@@ -335,9 +360,10 @@ def main() -> None:
     print(f"[+] Nullable functions found:       {len(nullable_funcs)}", file=sys.stderr)
     print(f"[+] Non-null annotated (excluded):  {len(nonnull_funcs)}", file=sys.stderr)
     print(f"[+] Null-safe functions (excluded from $OUTER): {len(null_safe_funcs)}", file=sys.stderr)
+    print(f"[+] Known third-party nullable (seeded): {len(KNOWN_THIRD_PARTY_NULLABLE)}", file=sys.stderr)
 
     if args.list_only:
-        print("\nNullable functions:")
+        print("\nNullable functions (project-discovered):")
         for f in sorted(nullable_funcs):
             print(f"  {f}")
         if nonnull_funcs:
@@ -348,6 +374,12 @@ def main() -> None:
             print("\nNull-safe functions (excluded from $OUTER in Rule 4):")
             for f in sorted(null_safe_funcs):
                 print(f"  {f}")
+        print("\nKnown third-party nullable functions (Rule 4 $INNER + Rule 5 taint sources):")
+        for f in sorted(KNOWN_THIRD_PARTY_NULLABLE):
+            print(f"  {f}")
+        print("\nFixed stdlib nullable functions (Rule 5 taint sources):")
+        for f in sorted(STDLIB_NULLABLE_FUNCS):
+            print(f"  {f}")
         return
 
     rules_yaml = generate_rules(nullable_funcs, nonnull_funcs, null_safe_funcs)
