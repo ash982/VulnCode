@@ -969,11 +969,39 @@ Four rules are generated automatically, replacing their heuristic counterparts:
 | `generated-unchecked-chained-nullable-call` | `unchecked-chained-call-result` |
 | `generated-null-pointer-unchecked-taint` | `null-pointer-unchecked-taint` |
 
-The generated taint rule (Rule 5) combines project-specific nullable functions discovered by the toolchain with a fixed set of stdlib nullable functions (`malloc`, `calloc`, `strdup`, `getenv`, `fopen`, `strstr`, `strchr`, etc.), replacing the heuristic regex in `null-pointer-unchecked-taint` with an exact source list.
+The generated taint rule (Rule 5) combines project-specific nullable functions discovered by the toolchain with a fixed set of stdlib nullable functions (`malloc`, `calloc`, `strdup`, `getenv`, `fopen`, `strstr`, `strchr`, etc.) and a seeded set of known third-party nullable functions, replacing the heuristic regex in `null-pointer-unchecked-taint` with an exact source list.
 
-> Do **not** run the heuristic rules alongside the generated rules — doing so produces duplicate findings and reintroduces the false positives the toolchain was designed to eliminate.
->
-> **Exception:** keep the heuristic rules scoped to third-party library headers where source is unavailable for scanning and `find_nullable_functions` cannot discover nullable functions.
+> Do **not** run the original rules alongside the generated rules — doing so produces duplicate findings and reintroduces the heuristic false positives the toolchain was designed to eliminate.
+
+### Third-party library gap
+
+`find_nullable_functions.yaml` only discovers functions whose **source code is scanned**. Third-party library functions (OpenSSL, libcurl, etc.) are compiled objects — their source is not present, so `find_nullable_functions` never discovers them and they are absent from the generated `exact_regex`.
+
+**Example:** `X509_NAME_oneline(X509_get_issuer_name(ccert), buf, 1024)` — `X509_get_issuer_name` returns `NULL` if the certificate has no issuer, but it is an OpenSSL function. The toolchain alone cannot detect this as a chained-call hazard.
+
+**Solution — `KNOWN_THIRD_PARTY_NULLABLE` in `build_nullable_allowlist.py`:**
+
+```python
+KNOWN_THIRD_PARTY_NULLABLE: set[str] = {
+    # OpenSSL — X509
+    "X509_get_issuer_name",       # returns NULL if cert has no issuer
+    "X509_get_subject_name",      # returns NULL if cert has no subject
+    "X509_get_pubkey",            # returns NULL on failure
+    # OpenSSL — BIO
+    "BIO_new",                    # returns NULL on allocation failure
+    "BIO_new_mem_buf",            # returns NULL on failure
+    # OpenSSL — EVP
+    "EVP_get_digestbyname",       # returns NULL if digest not found
+    "EVP_MD_CTX_new",             # returns NULL on allocation failure
+}
+```
+
+These functions are statically seeded and merged into:
+- **Rule 4 `$INNER` regex** — catches chained calls where a third-party nullable return is passed directly to another function without a NULL check
+- **Rule 5 taint sources** — tracks NULL propagation from third-party returns through the codebase
+
+Add new entries to `KNOWN_THIRD_PARTY_NULLABLE` whenever a third-party library function is found to return NULL and is used in chained calls or assigned without a check.
+
 
 
 
