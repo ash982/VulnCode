@@ -973,7 +973,7 @@ The generated taint rule (Rule 5) combines project-specific nullable functions d
 
 > Do **not** run the original rules alongside the generated rules — doing so produces duplicate findings and reintroduces the heuristic false positives the toolchain was designed to eliminate.
 
-### Third-party library gap
+### ⚠️ Third-party library gap
 
 `find_nullable_functions.yaml` only discovers functions whose **source code is scanned**. Third-party library functions (OpenSSL, libcurl, etc.) are compiled objects — their source is not present, so `find_nullable_functions` never discovers them and they are absent from the generated `exact_regex`.
 
@@ -986,10 +986,10 @@ The OpenSSL header provides no machine-readable nullability contract:
 X509_NAME *X509_get_issuer_name(const X509 *x);
 ```
 
-There is no `_Nullable`, no SAL annotation, no `__attribute__` — nullability is documented in prose only. This is the norm for most C libraries.
+There is no `_Nullable`, no SAL annotation, no `__attribute__` — nullability is documented in prose only but not expressed in the type system. This is the norm for most C libraries (OpenSSL, libcurl, sqlite, etc.).
 
-#### Why automated discovery approaches fall short
-
+#### Why automated discovery approaches fall short  
+Explains why header scanning fails (no annotation) and why call-site inference fails (the only call site is the vulnerable one — no checked callers to learn from):                              
 **Header annotation scanning** — looks for `_Nullable` / `_Ret_maybenull_` / `__nullable` in `.h` files. Does not work for OpenSSL-style headers that carry no annotations.
 
 **Call-site inference** — looks for existing NULL checks after a function call in the scanned codebase, e.g.:
