@@ -974,6 +974,33 @@ The generated taint rule (Rule 5) combines project-specific nullable functions d
 
 > Do **not** run the original rules alongside the generated rules — doing so produces duplicate findings and reintroduces the heuristic false positives the toolchain was designed to eliminate.
 
+
+**Why NOT convert generated rules 2/3/4 to taint mode:**  
+
+| | Syntactic (current) | Taint mode |
+|---|---|---|
+| Speed           | Fast                      | Much slower, especially interfile |
+| False positives | Low — exact pattern match | Higher — any taint flow to sink   |
+| Precision       | High                      | Lower                             |
+| Cross-file      | No                        | Yes                               |
+| Semgrep tier    | OSS                       | Pro required                      |
+                                              
+Converting them would also create massive duplication with Rule 5, since Rule 5 is already taint mode and covers cross-file flows.
+**The real gap is that Rule 5's sinks are too narrow** — it only catches print/strstr/strcmp/strlen/memcpy/strchr/fread/fwrite. It misses -> member access and *$PTR dereferences cross-file, which Rules 3 and 2b cover — but only within the same function scope.  
+
+Better approach: expand Rule 5's sinks instead of converting 2/3/4: 
+
+ ```  
+  pattern-sinks:
+    - pattern: $FUNC($X, ...)          # any function call (broad but catches cross-file API misuse)
+    - pattern: $X->$FIELD              # member access
+    - pattern: "*$X"                   # direct dereference
+    - pattern: $X[$IDX]                # array indexing
+```
+
+This keeps 2/3/4 as fast, precise, low-FP syntactic rules for same-scope findings, and relies on Rule 5 for cross-file propagation — each rule doing what it's best at.      
+
+
 ### ⚠️ Third-party library gap
 
 `find_nullable_functions.yaml` only discovers functions whose **source code is scanned**. Third-party library functions (OpenSSL, libcurl, etc.) are compiled objects — their source is not present, so `find_nullable_functions` never discovers them and they are absent from the generated `exact_regex`.
