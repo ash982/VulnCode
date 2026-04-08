@@ -226,6 +226,7 @@ rules:
       - pattern: $FUNC(...);
       - pattern-not: $VAR = $FUNC(...);
       - pattern-not: return $FUNC(...);
+      - pattern-not: (void)$FUNC(...);
       - pattern-not: if ($FUNC(...)) {{ ... }}
       - pattern-not: if (!$FUNC(...)) {{ ... }}
       - pattern-not: if ($FUNC(...) == NULL) {{ ... }}
@@ -234,7 +235,7 @@ rules:
           metavariable: $FUNC
           regex: '{exact_regex}'
 
-  # ── Rule 2: Assigned pointer used without NULL check ────────────────────────
+  # ── Rule 2: Assigned pointer used without NULL check (function-call sink) ───
   # Replaces: unchecked-pointer-before-use
   - id: generated-unchecked-nullable-pointer-use
     message: >
@@ -254,10 +255,26 @@ rules:
           $TYPE *$PTR = $FUNC(...);
           ...
           if (!$PTR) {{ ... }}
+          ...
+          $SINK($PTR, ...);
       - pattern-not: |
           $TYPE *$PTR = $FUNC(...);
           ...
           if ($PTR == NULL) {{ ... }}
+          ...
+          $SINK($PTR, ...);
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if (NULL == $PTR) {{ ... }}
+          ...
+          $SINK($PTR, ...);
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          assert($PTR);
+          ...
+          $SINK($PTR, ...);
       - pattern-not: |
           $TYPE *$PTR = $FUNC(...);
           ...
@@ -265,11 +282,121 @@ rules:
       - pattern-not: |
           $TYPE *$PTR = $FUNC(...);
           ...
+          if (NULL != $PTR) {{ ... }}
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
           if ($PTR) {{ ... }}
+      - metavariable-regex:
+          metavariable: $FUNC
+          regex: '{exact_regex}'
+
+  # ── Rule 2b: Assigned pointer dereferenced without NULL check ────────────────
+  - id: generated-unchecked-nullable-pointer-deref
+    message: >
+      Pointer `$PTR` returned by `$FUNC()` is dereferenced without a NULL check.
+      This function can return NULL; dereferencing it causes undefined behavior.
+    severity: ERROR
+    languages: [c, cpp]
+    metadata:
+      cwe: [CWE-476, CWE-690]
+      generated: true
+    patterns:
+      - pattern: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          *$PTR;
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if (!$PTR) {{ ... }}
+          ...
+          *$PTR;
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if ($PTR == NULL) {{ ... }}
+          ...
+          *$PTR;
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if (NULL == $PTR) {{ ... }}
+          ...
+          *$PTR;
       - pattern-not: |
           $TYPE *$PTR = $FUNC(...);
           ...
           assert($PTR);
+          ...
+          *$PTR;
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if ($PTR != NULL) {{ ... }}
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if (NULL != $PTR) {{ ... }}
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if ($PTR) {{ ... }}
+      - metavariable-regex:
+          metavariable: $FUNC
+          regex: '{exact_regex}'
+
+  # ── Rule 2c: Assigned pointer used via array index without NULL check ────────
+  - id: generated-unchecked-nullable-pointer-index
+    message: >
+      Pointer `$PTR` returned by `$FUNC()` is indexed without a NULL check.
+      This function can return NULL; indexing it causes undefined behavior.
+    severity: ERROR
+    languages: [c, cpp]
+    metadata:
+      cwe: [CWE-476, CWE-690]
+      generated: true
+    patterns:
+      - pattern: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          $PTR[$IDX];
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if (!$PTR) {{ ... }}
+          ...
+          $PTR[$IDX];
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if ($PTR == NULL) {{ ... }}
+          ...
+          $PTR[$IDX];
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if (NULL == $PTR) {{ ... }}
+          ...
+          $PTR[$IDX];
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          assert($PTR);
+          ...
+          $PTR[$IDX];
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if ($PTR != NULL) {{ ... }}
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if (NULL != $PTR) {{ ... }}
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if ($PTR) {{ ... }}
       - metavariable-regex:
           metavariable: $FUNC
           regex: '{exact_regex}'
@@ -294,10 +421,34 @@ rules:
           $TYPE *$PTR = $FUNC(...);
           ...
           if ($PTR == NULL) {{ ... }}
+          ...
+          $PTR->$FIELD;
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if (NULL == $PTR) {{ ... }}
+          ...
+          $PTR->$FIELD;
       - pattern-not: |
           $TYPE *$PTR = $FUNC(...);
           ...
           if (!$PTR) {{ ... }}
+          ...
+          $PTR->$FIELD;
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          assert($PTR);
+          ...
+          $PTR->$FIELD;
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if ($PTR != NULL) {{ ... }}
+      - pattern-not: |
+          $TYPE *$PTR = $FUNC(...);
+          ...
+          if (NULL != $PTR) {{ ... }}
       - pattern-not: |
           $TYPE *$PTR = $FUNC(...);
           ...
@@ -310,6 +461,7 @@ rules:
   # Replaces: unchecked-chained-call-result
   # $INNER constrained to known nullable functions (exact list).
   # $OUTER constrained to exclude known null-safe functions (discovered by find-null-safe-functions).
+  # Pattern uses (..., $INNER(...), ...) to match $INNER at any argument position.
   - id: generated-unchecked-chained-nullable-call
     message: >
       Return value of `$INNER()` is passed directly to `$OUTER()` without a NULL check.
@@ -320,7 +472,7 @@ rules:
       cwe: [CWE-476, CWE-690]
       generated: true
     patterns:
-      - pattern: $OUTER($INNER(...), ...)
+      - pattern: $OUTER(..., $INNER(...), ...)
       - metavariable-regex:
           metavariable: $INNER
           regex: '{exact_regex}'
@@ -351,7 +503,9 @@ rules:
     pattern-sanitizers:
       - pattern: if (!$X) {{ ... }}
       - pattern: if ($X == NULL) {{ ... }}
+      - pattern: if (NULL == $X) {{ ... }}
       - pattern: if ($X != NULL) {{ ... }}
+      - pattern: if (NULL != $X) {{ ... }}
       - pattern: if ($X) {{ ... }}
       - pattern: assert($X)
     pattern-sinks:
